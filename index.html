@@ -2,123 +2,216 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Random dãy nhị phân 10 bit</title>
+<title>Xử lý bit với mặt nạ</title>
 
 <style>
+/* ===== NỀN CHUNG ===== */
 body {
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #ffe259, #ffa751);
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  overflow-x: hidden;
+  color: #fff;
+  background: radial-gradient(circle at bottom, #020111 0%, #000 80%);
+}
+
+/* LỚP SAO 1 */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  background-repeat: repeat;
+  animation: starsMove 120s linear infinite;
+}
+
+/* SAO NHỎ */
+body::before {
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, white, transparent),
+    radial-gradient(2px 1px at 80% 40%, white, transparent),
+    radial-gradient(1px 2px at 50% 70%, white, transparent),
+    radial-gradient(2px 4px at 10% 90%, white, transparent);
+  background-size: 200px 200px;
+  opacity: 0.8;
+}
+
+/* SAO TO + LẤP LÁNH */
+body::after {
+  background-image:
+    radial-gradient(2px 3px at 30% 20%, #7df9ff, transparent),
+    radial-gradient(3px 2px at 60% 80%, #ffffff, transparent),
+    radial-gradient(2px 3px at 90% 50%, #7df9ff, transparent);
+  background-size: 350px 350px;
+  animation: starsTwinkle 6s ease-in-out infinite alternate;
+}
+
+/* SAO DI CHUYỂN */
+@keyframes starsMove {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(-50%, -50%); }
+}
+
+/* SAO NHẤP NHÁY */
+@keyframes starsTwinkle {
+  from { opacity: 0.4; }
+  to   { opacity: 1; }
+}
+
+/* ===== HỘP ===== */
+.box {
+  background: linear-gradient(145deg, #1f2547, #12162c);
+  border: 2px solid rgba(255,255,255,0.15);
+  padding: 18px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow:
+    0 0 20px rgba(80,120,255,0.25),
+    inset 0 0 20px rgba(255,255,255,0.05);
+  transition: transform .3s, box-shadow .3s;
 }
 
 .container {
-    padding: 30px 40px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #ff1a1a, #ff004c);
-    border: 3px solid #ff0033;
-    box-shadow: 0 0 25px rgba(255,0,60,0.7);
-    text-align: center;
-    color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  margin-top: 30px;
 }
 
+.box:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 0 30px rgba(120,160,255,0.5),
+    inset 0 0 25px rgba(255,255,255,0.08);
+}
+
+/* ===== GROUP ===== */
 .group {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.bit {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* ===== CELL ===== */
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.bit span {
-    font-size: 12px;
-    margin-bottom: 4px;
+/* SỐ THỨ TỰ */
+.cell span {
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #9fb2ff;
+  text-shadow: 0 0 6px rgba(120,160,255,.6);
 }
 
-.input-bit,
-.result-bit {
-    width: 44px;
-    height: 44px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-    border-radius: 8px;
-    border: 2px solid #d2691e;
+/* ===== INPUT ===== */
+input.bit, input.result {
+  width: 42px;
+  height: 42px;
+  text-align: center;
+  font-size: 20px;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: #0f1430;
+  color: #fff;
+  box-shadow: inset 0 0 8px rgba(0,0,0,.6);
+  transition: all .25s;
 }
 
-.input-bit { background: #ffe0b2; }
-.result-bit { background: #f5deb3; }
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    margin: 5px;
-    background: #f1f1f1;
-    transition: 
-        box-shadow 0.3s ease,
-        transform 0.2s ease,
-        background 0.3s ease;
+/* INPUT ĐANG NHẬP */
+input.bit:focus {
+  outline: none;
+  border-color: #6fa3ff;
+  box-shadow:
+    0 0 10px rgba(120,170,255,.8),
+    inset 0 0 10px rgba(120,170,255,.3);
+  transform: scale(1.08);
 }
 
-/* Chỉ lung linh khi focus */
-button:focus {
-    outline: none;
-    background: linear-gradient(135deg, #ffe259, #ffa751);
+/* KẾT QUẢ */
+/* ===== RESULT NEON VÀNG RƠM ===== */
+input.result {
+  background: radial-gradient(circle at top, #2a2400, #141000);
+  color: #ffe27a; /* vàng rơm */
+
+  font-weight: bold;
+  border: 2px solid #ffd24a;
+
+  box-shadow:
+    0 0 6px rgba(255, 220, 120, 0.8),
+    0 0 14px rgba(255, 210, 90, 0.9),
+    0 0 28px rgba(255, 190, 50, 0.7),
+    inset 0 0 10px rgba(255, 230, 140, 0.6);
+
+  text-shadow:
+    0 0 6px rgba(255, 220, 120, 0.9),
+    0 0 12px rgba(255, 200, 80, 0.8);
+
+  transition: all 0.3s ease;
+}
+@keyframes strawNeonPulse {
+  0% {
     box-shadow:
-        0 0 6px rgba(255, 200, 0, 0.8),
-        0 0 14px rgba(255, 180, 0, 0.6),
-        0 0 28px rgba(255, 150, 0, 0.4);
-    transform: scale(1.05);
+      0 0 6px #ffd24a,
+      0 0 14px #ffcc33,
+      inset 0 0 8px #ffe8a0;
+  }
+  100% {
+    box-shadow:
+      0 0 14px #ffe27a,
+      0 0 30px #ffb800,
+      inset 0 0 14px #fff1b8;
+  }
 }
 
-.glow {
-    background: linear-gradient(135deg, #ffeb3b, #ffc107);
-    color: #000;
-    animation: yellowPulse 1.4s infinite alternate;
+input.result {
+  animation: strawNeonPulse 1.8s infinite alternate;
 }
 
-@keyframes yellowPulse {
-    from { box-shadow: 0 0 6px rgba(255,215,0,0.6); }
-    to   { box-shadow: 0 0 16px rgba(255,215,0,1); }
+/* ===== BUTTON ===== */
+button {
+  margin: 8px 6px;
+  padding: 8px 18px;
+  font-size: 15px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(145deg, #4f6cff, #2a3cff);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(80,120,255,.6);
+  transition: transform .2s, box-shadow .2s;
 }
 
-#processBtn {
-    background: linear-gradient(135deg, #ff3b3b, #ff8a00);
-    color: #fff;
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px rgba(120,170,255,.9);
 }
 
-.reset {
-    background: linear-gradient(135deg, #00c6ff, #0072ff);
-    color: #fff;
-    box-shadow: 0 0 8px rgba(0,198,255,0.7);
-    animation: resetGlow 1.6s infinite alternate;
+/* ===== NÚT TÍNH NHẤP NHÁY KHI FOCUS ===== */
+@keyframes blinkGlow {
+  0%   { box-shadow: 0 0 10px #4f6cff; }
+  50%  { box-shadow: 0 0 30px #9fb2ff; }
+  100% { box-shadow: 0 0 10px #4f6cff; }
 }
 
-@keyframes resetGlow {
-    from {
-        box-shadow:
-            0 0 6px rgba(0,198,255,0.6),
-            0 0 12px rgba(0,114,255,0.6);
-        transform: scale(1);
-    }
-    to {
-        box-shadow:
-            0 0 14px rgba(0,198,255,1),
-            0 0 28px rgba(0,114,255,1);
-        transform: scale(1.04);
-    }
+button:focus {
+  outline: none;
+  animation: blinkGlow 0.9s infinite;
+}
+
+/* RESET NHẸ HƠN */
+button:last-of-type {
+  background: linear-gradient(145deg, #ff5f5f, #c83232);
+  box-shadow: 0 0 10px rgba(255,90,90,.6);
 }
 </style>
 </head>
@@ -126,109 +219,188 @@ button:focus {
 <body>
 
 <div class="container">
-    <h3>Nhập 10 bit</h3>
 
-    <div class="group">
-        <div class="bit"><span>0</span><input class="input-bit" maxlength="1"></div>
-        <div class="bit"><span>1</span><input class="input-bit" maxlength="1"></div>
-        <div class="bit"><span>2</span><input class="input-bit" maxlength="1"></div>
-        <div class="bit"><span>3</span><input class="input-bit" maxlength="1"></div>
-        <div class="bit"><span>4</span><input class="input-bit" maxlength="1"></div>
-        <div class="bit"><span>5</span><input class="input-bit" maxlength="1"></div>
-        <div class="bit"><span>6</span><input class="input-bit" maxlength="1"></div>
-        <div class="bit"><span>7</span><input class="input-bit" maxlength="1"></div>
-        <div class="bit"><span>8</span><input class="input-bit" maxlength="1"></div>
-        <div class="bit"><span>9</span><input class="input-bit" maxlength="1"></div>
+<!-- ================= HỘP 1 ================= -->
+<div class="box" id="box0">
+  <h3>Hộp 1</h3>
+
+  <div class="group">
+    <div class="cell"><span>0</span>
+      <input class="bit" id="b0" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(0)">
     </div>
-
-    <div class="group">
-        <button id="processBtn">Bùm Bùm Bùm</button>
-        <button class="reset" id="resetBtn">Reset</button>
+    <div class="cell"><span>1</span>
+      <input class="bit" id="b1" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(1)">
     </div>
+    <div class="cell"><span>2</span>
+      <input class="bit" id="b2" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(2)">
+    </div>
+    <div class="cell"><span>3</span>
+      <input class="bit" id="b3" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(3)">
+    </div>
+    <div class="cell"><span>4</span>
+      <input class="bit" id="b4" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(4)">
+    </div>
+  </div>
 
-    <h3>Kết quả</h3>
+  <button id="btn0" onclick="tinh(0)">Tính</button>
+  <button onclick="resetBox(0)">Reset</button>
+  <p id="info0"></p>
 
-    <div class="group">
-    <div class="bit"><span>0</span><input class="result-bit" readonly></div>
-    <div class="bit"><span>1</span><input class="result-bit" readonly></div>
-    <div class="bit"><span>2</span><input class="result-bit" readonly></div>
-    <div class="bit"><span>3</span><input class="result-bit" readonly></div>
-    <div class="bit"><span>4</span><input class="result-bit" readonly></div>
-
-    <div class="bit"><span>5</span><input class="result-bit glow" readonly></div>
-    <div class="bit"><span>6</span><input class="result-bit glow" readonly></div>
-    <div class="bit"><span>7</span><input class="result-bit glow" readonly></div>
-    <div class="bit"><span>8</span><input class="result-bit glow" readonly></div>
-    <div class="bit"><span>9</span><input class="result-bit glow" readonly></div>
+  <div class="group">
+    <div class="cell"><span>0</span><input class="result" id="r0" readonly></div>
+    <div class="cell"><span>1</span><input class="result" id="r1" readonly></div>
+    <div class="cell"><span>2</span><input class="result" id="r2" readonly></div>
+    <div class="cell"><span>3</span><input class="result" id="r3" readonly></div>
+    <div class="cell"><span>4</span><input class="result" id="r4" readonly></div>
+  </div>
 </div>
+
+<!-- ================= HỘP 2 ================= -->
+<div class="box" id="box1">
+  <h3>Hộp 2</h3>
+
+  <div class="group">
+    <div class="cell"><span>5</span>
+      <input class="bit" id="b5" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(5)">
+    </div>
+    <div class="cell"><span>6</span>
+      <input class="bit" id="b6" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(6)">
+    </div>
+    <div class="cell"><span>7</span>
+      <input class="bit" id="b7" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(7)">
+    </div>
+    <div class="cell"><span>8</span>
+      <input class="bit" id="b8" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(8)">
+    </div>
+    <div class="cell"><span>9</span>
+      <input class="bit" id="b9" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(9)">
+    </div>
+  </div>
+
+  <button id="btn1" onclick="tinh(1)">Tính</button>
+  <button onclick="resetBox(1)">Reset</button>
+  <p id="info1"></p>
+
+  <div class="group">
+    <div class="cell"><span>5</span><input class="result" id="r5" readonly></div>
+    <div class="cell"><span>6</span><input class="result" id="r6" readonly></div>
+    <div class="cell"><span>7</span><input class="result" id="r7" readonly></div>
+    <div class="cell"><span>8</span><input class="result" id="r8" readonly></div>
+    <div class="cell"><span>9</span><input class="result" id="r9" readonly></div>
+  </div>
 </div>
+
+</div>
+
 
 <script>
-const inputs = document.querySelectorAll('.input-bit');
-const results = document.querySelectorAll('.result-bit');
-const processBtn = document.getElementById('processBtn');
-const resetBtn = document.getElementById('resetBtn');
+// =======================
+// 32 MẶT NẠ
+// =======================
+const masks = [
+  [0,0,1,1,1],[0,1,0,0,0],[0,1,1,0,0],[1,1,0,1,0],
+  [0,0,0,1,0],[0,0,0,1,1],[0,1,1,0,0],[0,0,0,1,0],
+  [1,0,0,0,1],[0,1,1,0,1],[1,0,1,0,0],[1,1,0,1,0],
+  [1,0,0,1,0],[1,0,0,0,0],[1,0,0,1,1],[0,0,0,1,1],
+  [1,1,1,0,0],[1,1,1,0,1],[0,1,0,0,0],[0,1,0,0,1],  
+  [1,0,1,0,1],[1,0,1,1,0],[1,0,1,1,1],[0,0,0,1,1],
+  [0,0,0,0,0],[0,0,0,0,1],[1,1,0,0,0],[1,1,0,0,1],
+  [1,1,1,1,1],[1,1,0,1,1],[1,1,1,1,0],[1,0,0,0,1],
+  [0,0,1,0,0],[0,0,1,0,1],[0,0,1,1,0],[1,0,0,0,1],
+  [0,1,0,1,1],[0,1,0,1,0],[0,0,0,1,0],[0,1,1,0,0],
+  [0,1,1,1,0],[0,1,1,1,1],[1,1,1,1,0],[1,0,0,0,1],
+  [0,0,1,1,1],[0,1,0,0,0],[0,1,1,0,0],[1,1,0,1,0],
+  [0,0,0,1,0],[0,1,1,0,0],[0,0,0,1,0],[1,0,0,0,1],
+  [1,0,0,0,1],[0,1,1,0,1],[1,0,1,0,0],[1,1,0,1,0],
+  [1,1,1,1,0],[1,1,1,1,1],[0,0,0,1,1],[1,0,0,0,1],
+  
+  
+];
 
-// Shuffle
-function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
+let idx = [0, 0];
+
+// =======================
+// AUTO NEXT (ĐÃ SỬA ĐÚNG)
+// =======================
+function next(i) {
+  const el = document.getElementById("b" + i);
+  if (el.value !== "0" && el.value !== "1") {
+    el.value = "";
+    return;
+  }
+
+  // cuối hộp 1 → nút tính hộp 1
+  if (i === 4) {
+    document.getElementById("btn0").focus();
+    return;
+  }
+
+  // cuối hộp 2 → nút tính hộp 2
+  if (i === 9) {
+    document.getElementById("btn1").focus();
+    return;
+  }
+
+  // các ô còn lại
+  const nextEl = document.getElementById("b" + (i + 1));
+  if (nextEl) nextEl.focus();
 }
 
-// Dịch trái input 1–9, để trống ô 9
-function shiftInputsLeft() {
-    for (let i = 0; i < 9; i++) {
-        inputs[i].value = inputs[i + 1].value;
-    }
-    inputs[9].value = '';
-    inputs[9].focus();
-}
+// =======================
+// TÍNH
+// =======================
+function tinh(box) {
+  const base = box * 5;
+  const mask = masks[idx[box] % masks.length];
 
-// Bùm
-function handleBoom() {
-    const bits = [];
-
-    for (let i = 0; i < 10; i++) {
-        const v = inputs[i].value;
-        if (v !== '0' && v !== '1') {
-            alert('Nhập đủ 10 bit nhị phân (0 hoặc 1)');
-            return;
-        }
-        bits.push(v);
+  for (let i = 0; i < 5; i++) {
+    const v = document.getElementById("b" + (base + i)).value;
+    if (v !== "0" && v !== "1") {
+      alert("Chỉ nhập 0 hoặc 1");
+      return;
     }
 
-    shuffle(bits);
-    results.forEach((el, i) => el.value = bits[i]);
+    const bit = Number(v);
+    const result = mask[i] ? 1 - bit : bit;
 
-    shiftInputsLeft();
+    const outEl = document.getElementById("r" + (base + i));
+    outEl.value = result;
+
+    if (result === 1) {
+      // 🌕 VÀNG NEON
+      outEl.style.color = "#ffe27a";
+      outEl.style.textShadow =
+        "0 0 6px #ffe27a, 0 0 12px #ffd24a, 0 0 18px #ffb700";
+    } else {
+      // 💜 TÍM NEON
+      outEl.style.color = "#c77dff";
+      outEl.style.textShadow =
+        "0 0 6px #c77dff, 0 0 12px #9d4edd, 0 0 18px #7b2cbf";
+    }
+  }
+
+  document.getElementById("info" + box).innerText =
+    `Mặt nạ ${idx[box] + 1}/${masks.length}: [${mask.join(",")}]`;
+
+  idx[box]++;
+}
+// =======================
+// RESET
+// =======================
+function resetBox(box) {
+  const base = box * 5;
+  for (let i = 0; i < 5; i++) {
+    document.getElementById("b" + (base + i)).value = "";
+    document.getElementById("r" + (base + i)).value = "";
+  }
+  
+  document.getElementById("b" + base).focus();
 }
 
-processBtn.addEventListener('click', handleBoom);
 
-resetBtn.addEventListener('click', () => {
-    inputs.forEach(i => i.value = '');
-    results.forEach(r => r.value = '');
-    inputs[0].focus();
-});
-
-// Auto focus + kiểm tra nhập
-inputs.forEach((input, idx) => {
-    input.addEventListener('input', () => {
-        if (input.value !== '0' && input.value !== '1') {
-            input.value = '';
-            return;
-        }
-       if (idx < 9) {
-            inputs[idx + 1].focus();
-        } else {
-            processBtn.focus(); // 👈 nhập xong ô 9 → nhảy vào nút Bùm
-        }    });
-});
-
-window.onload = () => inputs[0].focus();
 </script>
 
 </body>
 </html>
+
+
