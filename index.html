@@ -223,22 +223,22 @@ button:last-of-type {
 
 <!-- ================= HỘP 1 ================= -->
 <div class="box" id="box0">
-  <h3>Hộp 1</h3>
+  <h3>Nhập dãy số ban đầu</h3>
 
   <div class="group">
-    <div class="cell"><span>0</span>
+    <div class="cell"><span>n</span>
       <input class="bit" id="b0" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(0)">
     </div>
-    <div class="cell"><span>1</span>
+    <div class="cell"><span>n+1</span>
       <input class="bit" id="b1" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(1)">
     </div>
-    <div class="cell"><span>2</span>
+    <div class="cell"><span>n+2</span>
       <input class="bit" id="b2" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(2)">
     </div>
-    <div class="cell"><span>3</span>
+    <div class="cell"><span>n+3</span>
       <input class="bit" id="b3" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(3)">
     </div>
-    <div class="cell"><span>4</span>
+    <div class="cell"><span>n+4</span>
       <input class="bit" id="b4" type="tel" inputmode="numeric" pattern="[0-1]" maxlength="1" oninput="next(4)">
     </div>
   </div>
@@ -248,11 +248,11 @@ button:last-of-type {
   <p id="info0"></p>
 
   <div class="group">
-    <div class="cell"><span>0</span><input class="result" id="r0" readonly></div>
-    <div class="cell"><span>1</span><input class="result" id="r1" readonly></div>
-    <div class="cell"><span>2</span><input class="result" id="r2" readonly></div>
-    <div class="cell"><span>3</span><input class="result" id="r3" readonly></div>
-    <div class="cell"><span>4</span><input class="result" id="r4" readonly></div>
+    <div class="cell"><span>n</span><input class="result" id="r0" readonly></div>
+    <div class="cell"><span>n+1</span><input class="result" id="r1" readonly></div>
+    <div class="cell"><span>n+2</span><input class="result" id="r2" readonly></div>
+    <div class="cell"><span>n+3</span><input class="result" id="r3" readonly></div>
+    <div class="cell"><span>n+4</span><input class="result" id="r4" readonly></div>
   </div>
 </div>
 
@@ -403,6 +403,7 @@ function resetBox(box) {
 
 </body>
 </html>
+
 
 
 
