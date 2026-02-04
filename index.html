@@ -3,67 +3,74 @@
 <head>
 <meta charset="UTF-8">
 <title>Vòng quay kỷ luật</title>
+
 <style>
-    body {
-        margin: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #ffa726, #ff7043);
-        font-family: Arial, sans-serif;
-    }
-
-    h2 {
-        color: #fff;
-        margin-bottom: 15px;
-        text-align: center;
-    }
-
-    .wheel-wrapper {
-        position: relative;
-        width: 320px;
-        height: 320px;
-    }
-
-    canvas {
-        border-radius: 50%;
-        background: #fff;
-    }
-
-.pointer {
-    bottom: -6px;
-    top: auto;
-    left: 50%;
-    transform: translateX(-50%);
-    border-top: 22px solid #000;
-    border-bottom: none;
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffa726, #ff7043);
+    font-family: Arial, sans-serif;
 }
 
-    button {
-        margin-top: 20px;
-        padding: 10px 28px;
-        font-size: 16px;
-        border-radius: 20px;
-        border: none;
-        background: #ff5722;
-        color: #fff;
-        cursor: pointer;
-    }
+h2 {
+    color: #fff;
+    margin-bottom: 15px;
+    text-align: center;
+}
 
-    button:active {
-        transform: scale(0.97);
-    }
+.wheel-wrapper {
+    position: relative;
+    width: 320px;
+    height: 320px;
+}
 
-    #result {
-        margin-top: 15px;
-        color: #fff;
-        font-size: 18px;
-        font-weight: bold;
-    }
+canvas {
+    border-radius: 50%;
+    background: #fff;
+}
+
+/* MŨI TÊN CHỈ XUỐNG */
+.pointer {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 22px solid #000;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
+}
+
+button {
+    margin-top: 20px;
+    padding: 10px 28px;
+    font-size: 16px;
+    border-radius: 20px;
+    border: none;
+    background: #ff5722;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+#result {
+    margin-top: 15px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+}
 </style>
 </head>
+
 <body>
 
 <h2>Nghiêm túc giữ kỷ luật thì sẽ tiến bộ</h2>
@@ -82,18 +89,24 @@ const ctx = canvas.getContext("2d");
 const radius = canvas.width / 2;
 
 const items = [
-    "0-1-1-0",
-    "1-0-1-1",
-    "Bỏ qua",
-    "1-1-0-1",
-    "1-0-1-0",
+    
+    "0-0-0-1",
     "0-0-1-0",
-    "Bỏ qua",
-    "1-1-1-0",
+    "0-0-1-1",
     "0-1-0-0",
+    "0-1-0-1",
+    "0-1-1-0",
+    "Bỏ qua",
+    "0-1-1-1",
     "1-0-0-0",
+    "1-0-0-1",
+    "1-0-1-0",
     "1-0-1-1",
-    "0-1-1-1"
+     "Bỏ qua",
+    "1-1-0-0",
+    "1-1-0-1",
+    "1-1-1-0"
+
 ];
 
 const colors = [
@@ -133,19 +146,21 @@ function spin() {
     if (spinning) return;
     spinning = true;
 
-    const duration = 3000; // 3 giây
+    const duration = 3000;          // 3 giây
     const start = performance.now();
     const startAngle = angle;
-    const extraRounds = 5; // số vòng quay thêm
+    const extraRounds = 5;
+    const randomOffset = Math.random() * 2 * Math.PI;
 
     function animate(now) {
         const elapsed = now - start;
         const progress = Math.min(elapsed / duration, 1);
-
-        // easing cho mượt
         const easeOut = 1 - Math.pow(1 - progress, 3);
 
-        angle = startAngle + easeOut * extraRounds * 2 * Math.PI;
+        angle =
+            startAngle +
+            easeOut * (extraRounds * 2 * Math.PI + randomOffset);
+
         drawWheel();
 
         if (progress < 1) {
@@ -158,10 +173,16 @@ function spin() {
 
     requestAnimationFrame(animate);
 }
+
 function showResult() {
     const arc = 2 * Math.PI / items.length;
+
+    // mũi tên ở trên, chỉ xuống
+    const normalizedAngle =
+        (angle + Math.PI / 2) % (2 * Math.PI);
+
     const index =
-        Math.floor(items.length - (angle % (2 * Math.PI)) / arc) % items.length;
+        Math.floor((2 * Math.PI - normalizedAngle) / arc) % items.length;
 
     document.getElementById("result").innerText =
         "Kết quả: " + items[index];
