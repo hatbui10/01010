@@ -32,17 +32,14 @@
         background: #fff;
     }
 
-    .pointer {
-        position: absolute;
-        top: -6px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 14px solid transparent;
-        border-right: 14px solid transparent;
-        border-bottom: 22px solid #000;
-    }
+.pointer {
+    bottom: -6px;
+    top: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    border-top: 22px solid #000;
+    border-bottom: none;
+}
 
     button {
         margin-top: 20px;
@@ -136,25 +133,31 @@ function spin() {
     if (spinning) return;
     spinning = true;
 
-    let speed = Math.random() * 0.4 + 0.4;
-    let deceleration = 0.995;
+    const duration = 3000; // 3 giây
+    const start = performance.now();
+    const startAngle = angle;
+    const extraRounds = 5; // số vòng quay thêm
 
-    function animate() {
-        angle += speed;
-        speed *= deceleration;
+    function animate(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
 
+        // easing cho mượt
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+
+        angle = startAngle + easeOut * extraRounds * 2 * Math.PI;
         drawWheel();
 
-        if (speed < 0.002) {
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
             spinning = false;
             showResult();
-            return;
         }
-        requestAnimationFrame(animate);
     }
-    animate();
-}
 
+    requestAnimationFrame(animate);
+}
 function showResult() {
     const arc = 2 * Math.PI / items.length;
     const index =
@@ -169,3 +172,4 @@ drawWheel();
 
 </body>
 </html>
+
