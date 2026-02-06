@@ -113,8 +113,10 @@ button:active {
 <body>
 
 <div class="app-box">
+        <button onclick="resetSpin()">Reset lượt quay</button>
     <h2>Nghiêm túc giữ kỷ luật thì sẽ tiến bộ</h2>
     <h1>Tốc độ hồi phục : 1-3-9-27-81-160</h1>
+    <h1 id="countdownText" style="color:#fff;">Sẵn sàng quay</h1>
     <h1 id="spinCountText">Số lượt quay hôm nay: 0 / 15</h1>
      <h1>Thời gian bắt đầu sau 2 giờ  </h1>
     
@@ -127,7 +129,7 @@ button:active {
     </div>
 
     <button onclick="spin()">Spin</button>
-    <button onclick="resetSpin()">Reset lượt quay</button>
+
 </div>
 
 
@@ -337,6 +339,7 @@ startCountdown();
 
 </body>
 </html>
+
 
 
 
