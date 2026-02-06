@@ -129,6 +129,7 @@ button:active {
     <button onclick="spin()">Spin</button>
     
 </div>
+<button onclick="resetSpin()">Reset (test)</button>
 
 
 <script>
@@ -278,6 +279,12 @@ function spin() {
     requestAnimationFrame(animate);
 }
 
+    function resetSpin() {
+    localStorage.removeItem("wheel_spin_data");
+    updateSpinText();
+    alert("Đã reset số lượt quay");
+}
+
 function showResult() {
     const arc = 2 * Math.PI / items.length;
 
@@ -299,4 +306,5 @@ updateSpinText();
 
 </body>
 </html>
+
 
