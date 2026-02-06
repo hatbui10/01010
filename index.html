@@ -2,142 +2,171 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Tách chuỗi theo marker</title>
+<title>Tách & phân tích chuỗi bit</title>
+
 <style>
 body {
     font-family: "Segoe UI", Arial, sans-serif;
     padding: 40px;
-    background: red;
-    color: #1f2937;
+    background: #0b1220;
+    color: #e5e7eb;
 }
 
 h2 {
     margin-bottom: 20px;
-    color: #1e3a8a;
+    color: #93c5fd;
 }
 
-input[type="text"],
-input[type="file"] {
+input {
     padding: 10px 12px;
     font-size: 15px;
-    width: 240px;
+    width: 220px;
     border-radius: 8px;
-    border: 1px solid #c7d2fe;
-    outline: none;
-    transition: all 0.25s ease;
-    background: #fff;
-}
-
-input[type="text"]:focus,
-input[type="file"]:focus {
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.25);
+    border: 1px solid #334155;
+    background: #020617;
+    color: #e5e7eb;
+    margin-bottom: 10px;
 }
 
 button {
     padding: 12px 26px;
     font-size: 16px;
-    margin-top: 18px;
+    margin-top: 12px;
     border-radius: 999px;
     border: none;
     background: linear-gradient(135deg, #6366f1, #4f46e5);
     color: #fff;
     cursor: pointer;
     font-weight: 600;
-    letter-spacing: 0.3px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(79,70,229,0.35);
-}
-
-button:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 10px rgba(79,70,229,0.3);
-}
-
-pre {
-    background: #0f172a;
-    color: #e5e7eb;
-    padding: 18px;
+#preview {
     margin-top: 24px;
-    border-radius: 14px;
-    max-height: 320px;
+    max-height: 400px;
     overflow: auto;
+}
+
+.line {
     font-family: "JetBrains Mono", Consolas, monospace;
-    font-size: 14px;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    white-space: pre;
+}
+
+.normal {
+    background: #020617;
+}
+
+.match {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    color: #022c22;
+    font-weight: 700;
 }
 
 .info {
-    margin-top: 18px;
+    margin-top: 14px;
     font-weight: 600;
-    color: #1e40af;
+    color: #93c5fd;
+}
+
+a.jump {
+    color: #60a5fa;
+    cursor: pointer;
+    margin-right: 8px;
+    text-decoration: underline;
 }
 </style>
 </head>
+
 <body>
 
-<h2>Tách chuỗi bit theo marker</h2>
+<h2>Tách & phân tích chuỗi bit</h2>
 
-<label>Marker cần tách:</label><br>
-<input type="text" id="marker" value="1000"><br><br>
+<label>Marker:</label><br>
+<input id="marker" value="1000"><br>
+
+<label>Số dòng liên tiếp (N):</label><br>
+<input id="groupSize" type="number" value="3"><br>
+
+<label>Tổng số bit cần tìm:</label><br>
+<input id="targetBits" type="number" value="15"><br>
 
 <input type="file" id="fileInput" accept=".txt"><br>
-<button onclick="processFile()">Xử lý & tải file</button>
+<button onclick="processFile()">Xử lý</button>
 
-<div class="info" id="lineCount"></div>
-<pre id="preview"></pre>
+<div class="info" id="summary"></div>
+<div class="info" id="positions"></div>
+
+<div id="preview"></div>
 
 <script>
-function processFile() {
-    const marker = document.getElementById("marker").value.trim();
-    if (!marker) {
-        alert("Marker không được để trống");
-        return;
-    }
+let lastRender = [];
 
-    const fileInput = document.getElementById("fileInput");
-    if (!fileInput.files.length) {
-        alert("Chưa chọn file TXT");
-        return;
-    }
+function processFile() {
+    const marker = markerValue();
+    const file = document.getElementById("fileInput").files[0];
+    if (!marker || !file) return alert("Thiếu marker hoặc file");
 
     const reader = new FileReader();
-    reader.onload = function(e) {
-        const data = e.target.result.replace(/\s+/g, "");
-        const parts = data.split(marker);
-        let result = [];
-
+    reader.onload = e => {
+        const raw = e.target.result.replace(/\s+/g, "");
+        const parts = raw.split(marker);
+        let lines = [];
         for (let i = 1; i < parts.length; i++) {
-            let segment = parts[i];
-            let next = segment.indexOf(marker);
-            if (next !== -1) {
-                segment = segment.substring(0, next);
-            }
-            result.push(marker + "    " + segment);
+            lines.push(marker + "    " + parts[i]);
         }
-
-        const output = result.join("\n");
-
-        document.getElementById("preview").textContent = output;
-        document.getElementById("lineCount").textContent =
-            "Tổng số dòng tách được: " + result.length;
-
-        const blob = new Blob([output], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "cut_by_marker.txt";
-        a.click();
-
-        URL.revokeObjectURL(url);
+        analyze(lines);
     };
+    reader.readAsText(file);
+}
 
-    reader.readAsText(fileInput.files[0]);
+function analyze(lines) {
+    const N = +document.getElementById("groupSize").value;
+    const target = +document.getElementById("targetBits").value;
+    const preview = document.getElementById("preview");
+
+    let bitLen = lines.map(l => {
+        let s = l.split(/\s+/)[1] || "";
+        return markerValue().length + s.length;
+    });
+
+    let highlight = Array(lines.length).fill(false);
+    let hits = [];
+
+    for (let i = 0; i <= lines.length - N; i++) {
+        let sum = 0;
+        for (let j = 0; j < N; j++) sum += bitLen[i + j];
+        if (sum === target) {
+            for (let j = 0; j < N; j++) highlight[i + j] = true;
+            hits.push(i + 1);
+        }
+    }
+
+    preview.innerHTML = "";
+    lines.forEach((l, i) => {
+        const div = document.createElement("div");
+        div.className = "line " + (highlight[i] ? "match" : "normal");
+        div.id = "line-" + (i + 1);
+        div.textContent = `#${i+1}  ${l}`;
+        preview.appendChild(div);
+    });
+
+    document.getElementById("summary").textContent =
+        `Tổng dòng: ${lines.length} | Số lần trùng: ${hits.length}`;
+
+    document.getElementById("positions").innerHTML =
+        hits.map(i => `<span class="jump" onclick="jump(${i})">#${i}</span>`).join("");
+
+    lastRender = { lines, highlight };
+}
+
+function jump(n) {
+    document.getElementById("line-" + n).scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function markerValue() {
+    return document.getElementById("marker").value.trim();
 }
 </script>
 
