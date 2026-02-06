@@ -115,7 +115,7 @@ button:active {
 <div class="app-box">
     <h2>Nghiêm túc giữ kỷ luật thì sẽ tiến bộ</h2>
     <h1>Tốc độ hồi phục : 5-15-45-100-210</h1>
-    <h1>Số lượt quay = 8 </h1>
+    <h1 id="spinCountText">Số lượt quay hôm nay: 0 / 9</h1>
      <h1>Thời gian bắt đầu sau 2 giờ  </h1>
     
 <div id="result"></div>
@@ -169,7 +169,24 @@ const items = [
 ];
 
 
+const MAX_SPINS = 9;
+const COOLDOWN_HOURS = 2;
+const STORAGE_KEY = "wheel_spin_data";
 
+function getSpinData() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : { count: 0, lockedUntil: 0 };
+}
+
+function saveSpinData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function updateSpinText() {
+    const data = getSpinData();
+    document.getElementById("spinCountText").innerText =
+        `Số lượt quay hôm nay: ${data.count} / ${MAX_SPINS}`;
+}
 
 let angle = 0;
 let spinning = false;
@@ -201,9 +218,27 @@ function drawWheel() {
 
 function spin() {
     if (spinning) return;
+
+    const data = getSpinData();
+    const now = Date.now();
+
+    // đang trong thời gian chờ
+    if (now < data.lockedUntil) {
+        const minutesLeft = Math.ceil((data.lockedUntil - now) / 60000);
+        alert(`Hôm nay đủ rồi 😌\nHãy đợi ${minutesLeft} phút nữa để tiếp tục`);
+        return;
+    }
+
+    // reset sau khi hết cooldown
+    if (data.count >= MAX_SPINS) {
+        data.count = 0;
+        data.lockedUntil = 0;
+        saveSpinData(data);
+    }
+
     spinning = true;
 
-    const duration = 3000;          // 3 giây
+    const duration = 3000;
     const start = performance.now();
     const startAngle = angle;
     const extraRounds = 5;
@@ -224,6 +259,18 @@ function spin() {
             requestAnimationFrame(animate);
         } else {
             spinning = false;
+
+            // tăng số lượt
+            data.count++;
+
+            // đủ 9 lượt thì khóa 2 giờ
+            if (data.count >= MAX_SPINS) {
+                data.lockedUntil = Date.now() + COOLDOWN_HOURS * 60 * 60 * 1000;
+                alert("Hôm nay đủ rồi 😴\nHãy đợi 2 giờ nữa để tiếp tục");
+            }
+
+            saveSpinData(data);
+            updateSpinText();
             showResult();
         }
     }
@@ -246,36 +293,10 @@ function showResult() {
 }
 
 drawWheel();
+updateSpinText();
+
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
