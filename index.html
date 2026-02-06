@@ -174,6 +174,36 @@ const MAX_SPINS = 9;
 const COOLDOWN_HOURS = 2;
 const STORAGE_KEY = "wheel_spin_data";
 
+let countdownInterval = null;
+
+function startCountdown() {
+    const countdownEl = document.getElementById("countdownText");
+
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    countdownInterval = setInterval(() => {
+        const data = getSpinData();
+        const now = Date.now();
+
+        if (now >= data.lockedUntil) {
+            countdownEl.innerText = "Sẵn sàng quay 🎯";
+            clearInterval(countdownInterval);
+            return;
+        }
+
+        const diff = data.lockedUntil - now;
+
+        const hours = Math.floor(diff / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+
+        countdownEl.innerText =
+            `Mở lại sau: ${hours.toString().padStart(2,"0")}:` +
+            `${minutes.toString().padStart(2,"0")}:` +
+            `${seconds.toString().padStart(2,"0")}`;
+    }, 1000);
+}
+
 function getSpinData() {
     const data = localStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : { count: 0, lockedUntil: 0 };
@@ -230,12 +260,8 @@ function spin() {
         return;
     }
 
-    // reset sau khi hết cooldown
-    if (data.count >= MAX_SPINS) {
-        data.count = 0;
-        data.lockedUntil = 0;
-        saveSpinData(data);
-    }
+  
+   
 
     spinning = true;
 
@@ -269,6 +295,7 @@ function spin() {
                 data.lockedUntil = Date.now() + COOLDOWN_HOURS * 60 * 60 * 1000;
                 alert("Hôm nay đủ rồi 😴\nHãy đợi 2 giờ nữa để tiếp tục");
             }
+             startCountdown();
 
             saveSpinData(data);
             updateSpinText();
@@ -279,9 +306,10 @@ function spin() {
     requestAnimationFrame(animate);
 }
 
-    function resetSpin() {
+  function resetSpin() {
     localStorage.removeItem("wheel_spin_data");
     updateSpinText();
+    startCountdown();
     alert("Đã reset số lượt quay");
 }
 
@@ -301,11 +329,15 @@ function showResult() {
 
 drawWheel();
 updateSpinText();
+startCountdown();
+
 
 </script>
 
+
 </body>
 </html>
+
 
 
 
