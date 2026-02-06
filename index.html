@@ -2,355 +2,145 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Radar tần số thấp</title>
-
+<title>Tách chuỗi theo marker</title>
 <style>
 body {
-    margin: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: #2845D6;
-    font-family: Arial, sans-serif;
+    font-family: "Segoe UI", Arial, sans-serif;
+    padding: 40px;
+    background: red;
+    color: #1f2937;
 }
 
 h2 {
-    color: #fff;
-    margin-bottom: 15px;
-    text-align: center;
-}
-    h1 {
-    color:  #34C759;
-    margin: 5px;
-    text-align: center;
+    margin-bottom: 20px;
+    color: #1e3a8a;
 }
 
-.wheel-wrapper {
-    position: relative;
-    width: 320px;
-    height: 320px;
-}
-
-canvas {
-    border-radius: 50%;
+input[type="text"],
+input[type="file"] {
+    padding: 10px 12px;
+    font-size: 15px;
+    width: 240px;
+    border-radius: 8px;
+    border: 1px solid #c7d2fe;
+    outline: none;
+    transition: all 0.25s ease;
     background: #fff;
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.15);
 }
 
-/* MŨI TÊN CHỈ XUỐNG */
-.pointer {
-    position: absolute;
-    top: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 12px solid transparent;
-    border-right: 12px solid transparent;
-    border-top: 22px solid #000;
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
+input[type="text"]:focus,
+input[type="file"]:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.25);
 }
 
 button {
-    margin-top: 20px;
-    padding: 30px 40px;
-    font-size: 34px;
-    border-radius: 20px;
-    border: 5px;
-    background: yellow;
-    color: red;
+    padding: 12px 26px;
+    font-size: 16px;
+    margin-top: 18px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(79,70,229,0.35);
 }
 
 button:active {
-    transform: scale(0.97);
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(79,70,229,0.3);
 }
 
-#result {
-    margin: 15px;
-    color: yellow;
-    font-size: 50px;
-    font-weight: bold;
+pre {
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 18px;
+    margin-top: 24px;
+    border-radius: 14px;
+    max-height: 320px;
+    overflow: auto;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 14px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
 }
 
-.wheel-frame::before {
-    content: "";
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    background: conic-gradient(
-        from 0deg,
-        #ff9800,
-        #ffc107,
-        #ff9800
-    );
-    filter: blur(8px);
-    opacity: 0.6;
-    z-index: -1;
+.info {
+    margin-top: 18px;
+    font-weight: 600;
+    color: #1e40af;
 }
-.wheel-frame {
-    position: relative;
-}
-
-.app-box {
-    padding: 28px 26px 32px;
-    border-radius: 28px;
-    background: red;
-    box-shadow:
-        0 18px 40px rgba(0,0,0,0.35),
-        inset 0 4px 10px rgba(255,255,255,0.8);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-
 </style>
 </head>
-
 <body>
 
-<div class="app-box">
-        <button onclick="resetSpin()">Reset lượt quay</button>
-    <h2>Nghiêm túc giữ kỷ luật thì sẽ tiến bộ</h2>
-    <h1>Tốc độ hồi phục : 1-3-9-27-81-160</h1>
-    <h1 id="countdownText" style="color:#fff;">Sẵn sàng quay</h1>
-    <h1 id="spinCountText">Số lượt quay hôm nay: 0 / 15</h1>
+<h2>Tách chuỗi bit theo marker</h2>
 
-    
-<div id="result"></div>
-    <div class="wheel-frame">
-        <div class="wheel-wrapper">
-            <div class="pointer"></div>
-            <canvas id="wheel" width="320" height="320"></canvas>
-        </div>
-    </div>
+<label>Marker cần tách:</label><br>
+<input type="text" id="marker" value="1000"><br><br>
 
-    <button onclick="spin()">Spin</button>
+<input type="file" id="fileInput" accept=".txt"><br>
+<button onclick="processFile()">Xử lý & tải file</button>
 
-</div>
-
-
+<div class="info" id="lineCount"></div>
+<pre id="preview"></pre>
 
 <script>
-const canvas = document.getElementById("wheel");
-const ctx = canvas.getContext("2d");
-const radius = canvas.width / 2;
-
-const items = [
-    
-    "0",
-     "1-1",
-    "1-0-1-0-0",
-    "1-1-0",
-    "0-1-1-0",
-    "1",
-     "1-1-0-1",
-     "1-0",
-       "1-0-0-1",
-     "0-1-0",
-    "0-0-1-0",
-     "1-0-0-1-0"
-];
-
-
-  const colors = [
-  "#FF3B30", // đỏ cam – đập vào mắt
-  "#FF9500", // cam tươi – nổi bật
-  "#FFCC00", // vàng đậm – sáng rõ
-  "#34C759", // xanh lá tươi – cân bằng mắt
-  "#00C7BE", // xanh ngọc – mát nhưng không chìm
-  "#007AFF", // xanh dương – rõ ràng
-  "#5856D6", // tím xanh – tạo chiều sâu
-  "#AF52DE", // tím hồng – nổi mà không sến
-  "#FF2D55", // hồng đậm – rất bắt mắt
-  "#8E8E93", // xám đậm – nghỉ mắt giữa các màu gắt
-  "#F2E3BB" , // gần đen – tạo tương phản mạnh
-      "#34C759"// xanh lá tươi – cân bằng mắt
-];
-
-
-const MAX_SPINS = 15;
-const COOLDOWN_HOURS = 2;
-const STORAGE_KEY = "wheel_spin_data";
-
-let countdownInterval = null;
-
-function startCountdown() {
-    const countdownEl = document.getElementById("countdownText");
-
-    if (countdownInterval) clearInterval(countdownInterval);
-
-    countdownInterval = setInterval(() => {
-        const data = getSpinData();
-        const now = Date.now();
-
-        if (now >= data.lockedUntil) {
-            countdownEl.innerText = "Sẵn sàng quay 🎯";
-            clearInterval(countdownInterval);
-            return;
-        }
-
-        const diff = data.lockedUntil - now;
-
-        const hours = Math.floor(diff / 3600000);
-        const minutes = Math.floor((diff % 3600000) / 60000);
-        const seconds = Math.floor((diff % 60000) / 1000);
-
-        countdownEl.innerText =
-            `Mở lại sau: ${hours.toString().padStart(2,"0")}:` +
-            `${minutes.toString().padStart(2,"0")}:` +
-            `${seconds.toString().padStart(2,"0")}`;
-    }, 1000);
-}
-
-function getSpinData() {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : { count: 0, lockedUntil: 0 };
-}
-
-function saveSpinData(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function updateSpinText() {
-    const data = getSpinData();
-    document.getElementById("spinCountText").innerText =
-        `Số lượt quay hôm nay: ${data.count} / ${MAX_SPINS}`;
-}
-
-let angle = 0;
-let spinning = false;
-
-function drawWheel() {
-    const arc = 2 * Math.PI / items.length;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let i = 0; i < items.length; i++) {
-        const start = angle + i * arc;
-
-        ctx.beginPath();
-        ctx.moveTo(radius, radius);
-        ctx.arc(radius, radius, radius, start, start + arc);
-        ctx.fillStyle = colors[i];
-        ctx.fill();
-
-        ctx.save();
-        ctx.translate(radius, radius);
-        ctx.rotate(start + arc / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#000";
-        ctx.font = "bold 18px Arial";
-
-        ctx.fillText(items[i], radius - 25, 5);
-        ctx.restore();
-    }
-}
-
-function spin() {
-    if (spinning) return;
-
-    const data = getSpinData();
-    const now = Date.now();
-
-    // đang trong thời gian chờ
-    if (now < data.lockedUntil) {
-        const minutesLeft = Math.ceil((data.lockedUntil - now) / 60000);
-        alert(`Hôm nay đủ rồi 😌\nHãy đợi ${minutesLeft} phút nữa để tiếp tục`);
+function processFile() {
+    const marker = document.getElementById("marker").value.trim();
+    if (!marker) {
+        alert("Marker không được để trống");
         return;
     }
 
-  
-   
-
-    spinning = true;
-
-    const duration = 3000;
-    const start = performance.now();
-    const startAngle = angle;
-    const extraRounds = 5;
-    const randomOffset = Math.random() * 2 * Math.PI;
-
-    function animate(now) {
-        const elapsed = now - start;
-        const progress = Math.min(elapsed / duration, 1);
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-
-        angle =
-            startAngle +
-            easeOut * (extraRounds * 2 * Math.PI + randomOffset);
-
-        drawWheel();
-
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            spinning = false;
-
-            // tăng số lượt
-            data.count++;
-
-            // đủ 9 lượt thì khóa 2 giờ
-            if (data.count >= MAX_SPINS) {
-                data.lockedUntil = Date.now() + COOLDOWN_HOURS * 60 * 60 * 1000;
-                alert("Hôm nay đủ rồi 😴\nHãy đợi 2 giờ nữa để tiếp tục");
-            }
-             startCountdown();
-
-            saveSpinData(data);
-            updateSpinText();
-            showResult();
-        }
+    const fileInput = document.getElementById("fileInput");
+    if (!fileInput.files.length) {
+        alert("Chưa chọn file TXT");
+        return;
     }
 
-    requestAnimationFrame(animate);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const data = e.target.result.replace(/\s+/g, "");
+        const parts = data.split(marker);
+        let result = [];
+
+        for (let i = 1; i < parts.length; i++) {
+            let segment = parts[i];
+            let next = segment.indexOf(marker);
+            if (next !== -1) {
+                segment = segment.substring(0, next);
+            }
+            result.push(marker + "    " + segment);
+        }
+
+        const output = result.join("\n");
+
+        document.getElementById("preview").textContent = output;
+        document.getElementById("lineCount").textContent =
+            "Tổng số dòng tách được: " + result.length;
+
+        const blob = new Blob([output], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "cut_by_marker.txt";
+        a.click();
+
+        URL.revokeObjectURL(url);
+    };
+
+    reader.readAsText(fileInput.files[0]);
 }
-
-  function resetSpin() {
-    localStorage.removeItem("wheel_spin_data");
-    updateSpinText();
-    startCountdown();
-    alert("Đã reset số lượt quay");
-}
-
-function showResult() {
-    const arc = 2 * Math.PI / items.length;
-
-    // mũi tên ở trên, chỉ xuống
-    const normalizedAngle =
-        (angle + Math.PI / 2) % (2 * Math.PI);
-
-    const index =
-        Math.floor((2 * Math.PI - normalizedAngle) / arc) % items.length;
-
-    document.getElementById("result").innerText =
-        "Kết quả: " + items[index];
-}
-
-drawWheel();
-updateSpinText();
-startCountdown();
-
-
 </script>
-
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
