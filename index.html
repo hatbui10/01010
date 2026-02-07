@@ -436,7 +436,9 @@ button:active {
 let lastOutputText = "";
 let BIT_SIZE = 17;
 let bits = [];
-let history = [];
+
+let historyBuffer = [];
+
 
 
 
@@ -451,13 +453,15 @@ function initRegister() {
         const input = document.createElement("input");
         input.className = "bit";
         input.maxLength = 1;
-        input.value = "0";
+        input.value = "-"; // 👈 chưa có dữ liệu
         container.appendChild(input);
         bits.push(input);
     }
 
-    history = [];
-    document.getElementById("historyBox").value = "";
+    // buffer lịch sử ban đầu toàn '-'
+    historyBuffer = Array(BIT_SIZE).fill("-");
+
+    historyBox.value = groupBits(historyBuffer.join(""), 5);
 }
 
 
@@ -664,35 +668,29 @@ input.addEventListener("input", () => {
     const val = input.value.replace(/[^01]/g, "");
     if (!val) return;
 
-    // shift trái N ô
-    for (let i = 0; i < BIT_SIZE; i++) {
-        bits[i].value = bits[i + 1].value;
-    }
+    // shift buffer lịch sử
+    historyBuffer.shift();
+    historyBuffer.push(val);
 
-    // bit mới vào ô cuối
+    // cập nhật register hiển thị
+    for (let i = 0; i < BIT_SIZE; i++) {
+        bits[i].value = historyBuffer[i];
+    }
     bits[BIT_SIZE].value = val;
 
-    const latestBits = bits
-        .slice(0, BIT_SIZE)
-        .map(b => b.value || "0")
-        .join("");
+    // hiển thị lịch sử (1 dòng duy nhất)
+    historyBox.value = groupBits(historyBuffer.join(""), 5);
 
-    saveHistory(latestBits);
-    updateMarker(latestBits);
+    // marker cũng chia nhóm
+    updateMarker(historyBuffer.join(""));
 
     input.value = "";
 });
 
 
-function saveHistory(bits17) {
-    const grouped = groupBits(bits17, 5);
 
-    history.unshift(grouped);
-    history = history.slice(0, 10);
 
-    document.getElementById("historyBox").value =
-        history.join("\n");
-}
+
 
 
 function updateMarker(bitsRaw) {
