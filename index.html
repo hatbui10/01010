@@ -12,15 +12,12 @@ body {
     color: #e5e7eb;
 }
 
-h2 {
-    margin-bottom: 20px;
-    color: #93c5fd;
-}
+h2 { color: #93c5fd; }
 
 input {
     padding: 10px 12px;
     font-size: 15px;
-    width: 220px;
+    width: 260px;
     border-radius: 8px;
     border: 1px solid #334155;
     background: #020617;
@@ -31,7 +28,6 @@ input {
 button {
     padding: 12px 26px;
     font-size: 16px;
-    margin-top: 12px;
     border-radius: 999px;
     border: none;
     background: linear-gradient(135deg, #6366f1, #4f46e5);
@@ -42,7 +38,7 @@ button {
 
 #preview {
     margin-top: 24px;
-    max-height: 400px;
+    max-height: 420px;
     overflow: auto;
 }
 
@@ -54,11 +50,15 @@ button {
     white-space: pre;
 }
 
-.normal {
-    background: #020617;
+.normal { background: #020617; }
+
+.matchN {
+    background: linear-gradient(90deg, #facc15, #fde047);
+    color: #422006;
+    font-weight: 700;
 }
 
-.match {
+.matchGroup {
     background: linear-gradient(90deg, #22c55e, #4ade80);
     color: #022c22;
     font-weight: 700;
@@ -70,12 +70,26 @@ button {
     color: #93c5fd;
 }
 
-a.jump {
+.jump {
     color: #60a5fa;
     cursor: pointer;
     margin-right: 8px;
     text-decoration: underline;
 }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 24px;
+    max-width: 560px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #c7d2fe;
+}
+
 </style>
 </head>
 
@@ -83,26 +97,48 @@ a.jump {
 
 <h2>Tách & phân tích chuỗi bit</h2>
 
-<label>Marker:</label><br>
-<input id="marker" value="1000"><br>
+<div class="form-grid">
 
-<label>Số dòng liên tiếp (N):</label><br>
-<input id="groupSize" type="number" value="3"><br>
+    <!-- CỘT TRÁI -->
+    <div class="form-group">
+        <label>Marker:</label>
+        <input id="marker" value="1000">
+    </div>
 
-<label>Tổng số bit cần tìm:</label><br>
-<input id="targetBits" type="number" value="15"><br>
+    <div class="form-group">
+        <label>Số dòng liên tiếp (N):</label>
+        <input id="groupSize" type="number" value="3">
+    </div>
 
-<input type="file" id="fileInput" accept=".txt"><br>
+    <div class="form-group">
+        <label>Tổng số bit (cho N dòng):</label>
+        <input id="targetBits" type="number" value="15">
+    </div>
+
+    <!-- CỘT PHẢI -->
+    <div class="form-group">
+        <label>Số bit cần kiểm tra sau marker (K):</label>
+        <input id="bitCount" type="number" value="5">
+    </div>
+
+    <div class="form-group">
+        <label>Chuỗi bit cần tìm:</label>
+        <input id="pattern" placeholder="vd: 01000">
+    </div>
+
+    <div class="form-group">
+        <label>Chọn file TXT:</label>
+        <input type="file" id="fileInput" accept=".txt">
+    </div>
+
+</div>
+
 <button onclick="processFile()">Xử lý</button>
 
 <div class="info" id="summary"></div>
 <div class="info" id="positions"></div>
-
 <div id="preview"></div>
-
 <script>
-let lastRender = [];
-
 function processFile() {
     const marker = markerValue();
     const file = document.getElementById("fileInput").files[0];
@@ -122,8 +158,10 @@ function processFile() {
 }
 
 function analyze(lines) {
-    const N = +document.getElementById("groupSize").value;
-    const target = +document.getElementById("targetBits").value;
+    const N = +groupSize.value;
+    const target = +targetBits.value;
+    const K = +bitCount.value;
+    const pattern = document.getElementById("pattern").value.trim();
     const preview = document.getElementById("preview");
 
     let bitLen = lines.map(l => {
@@ -131,38 +169,51 @@ function analyze(lines) {
         return markerValue().length + s.length;
     });
 
-    let highlight = Array(lines.length).fill(false);
+    let matchGroup = Array(lines.length).fill(false);
+    let matchN = Array(lines.length).fill(false);
     let hits = [];
 
+    // nhóm N dòng
     for (let i = 0; i <= lines.length - N; i++) {
         let sum = 0;
         for (let j = 0; j < N; j++) sum += bitLen[i + j];
         if (sum === target) {
-            for (let j = 0; j < N; j++) highlight[i + j] = true;
+            for (let j = 0; j < N; j++) matchGroup[i + j] = true;
             hits.push(i + 1);
         }
     }
 
+    // kiểm tra K bit sau marker
+    lines.forEach((l, i) => {
+        let suffix = l.split(/\s+/)[1] || "";
+        if (suffix.length >= K &&
+            pattern.length === K &&
+            suffix.substring(0, K) === pattern) {
+            matchN[i] = true;
+        }
+    });
+
     preview.innerHTML = "";
     lines.forEach((l, i) => {
         const div = document.createElement("div");
-        div.className = "line " + (highlight[i] ? "match" : "normal");
         div.id = "line-" + (i + 1);
+        div.className = "line " +
+            (matchGroup[i] ? "matchGroup" :
+             matchN[i] ? "matchN" : "normal");
         div.textContent = `#${i+1}  ${l}`;
         preview.appendChild(div);
     });
 
-    document.getElementById("summary").textContent =
-        `Tổng dòng: ${lines.length} | Số lần trùng: ${hits.length}`;
+    summary.textContent =
+        `Tổng dòng: ${lines.length} | Nhóm khớp: ${hits.length}`;
 
-    document.getElementById("positions").innerHTML =
+    positions.innerHTML =
         hits.map(i => `<span class="jump" onclick="jump(${i})">#${i}</span>`).join("");
-
-    lastRender = { lines, highlight };
 }
 
 function jump(n) {
-    document.getElementById("line-" + n).scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("line-" + n)
+        .scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function markerValue() {
