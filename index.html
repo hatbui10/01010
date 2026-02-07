@@ -399,45 +399,32 @@ button:active {
     <!-- ===== CỘT 3: SHIFT REGISTER + LỊCH SỬ ===== -->
     <div class="form-col">
 
-        <label>Thanh dịch 18 bit:</label>
-        <div id="shift-register">
-            <!-- 17 ô readonly -->
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-            <input class="bit" readonly>
-
-            <!-- Ô 18 nhập -->
-            <input
-                class="bit bit-input"
-                id="bit-input"
-                maxlength="1"
-                inputmode="numeric"
-                pattern="[01]"
-                autocomplete="off">
-        </div>
-
-        <label style="margin-top:12px;">Lịch sử 17 bit:</label>
-        <textarea
-            id="historyBox"
-            placeholder="Lịch sử 17 bit sẽ hiện ở đây…"
-            readonly>
-        </textarea>
-
+    <div class="form-group">
+        <label>Số bit lịch sử:</label>
+        <input id="bitSize" type="number" value="17" min="1">
+        <button type="button" onclick="initRegister()">Apply</button>
     </div>
+
+    <label>Shift Register:</label>
+    <div id="shift-register"></div>
+
+    <input
+        id="bit-input"
+        class="bit bit-input"
+        maxlength="1"
+        inputmode="numeric"
+        pattern="[01]"
+        autocomplete="off"
+    >
+
+    <label style="margin-top:12px;">Lịch sử bit:</label>
+    <textarea
+        id="historyBox"
+        placeholder="Lịch sử bit sẽ hiện ở đây…"
+        readonly>
+    </textarea>
+
+</div>
 
 </div>
 
@@ -447,6 +434,34 @@ button:active {
 
 <script>
 let lastOutputText = "";
+let BIT_SIZE = 17;
+let bits = [];
+let history = [];
+
+
+
+function initRegister() {
+    BIT_SIZE = +document.getElementById("bitSize").value || 17;
+
+    const container = document.getElementById("shift-register");
+    container.innerHTML = "";
+    bits = [];
+
+    for (let i = 0; i < BIT_SIZE + 1; i++) {
+        const input = document.createElement("input");
+        input.className = "bit";
+        input.maxLength = 1;
+        input.value = "0";
+        container.appendChild(input);
+        bits.push(input);
+    }
+
+    history = [];
+    document.getElementById("historyBox").value = "";
+}
+
+
+
 
 function processFile() {
     const marker = markerValue();
@@ -641,35 +656,38 @@ function markerValue() {
 
 
 
-const bits = document.querySelectorAll("#shift-register .bit");
 const input = document.getElementById("bit-input");
 
-let history = []; // lưu các dãy 18 bit
+
 
 input.addEventListener("input", () => {
     const val = input.value.replace(/[^01]/g, "");
     if (!val) return;
 
-    for (let i = 0; i < 17; i++) {
+    // shift trái N ô
+    for (let i = 0; i < BIT_SIZE; i++) {
         bits[i].value = bits[i + 1].value;
     }
 
-    bits[17].value = val;
+    // bit mới vào ô cuối
+    bits[BIT_SIZE].value = val;
 
-    saveHistory(val); // 👈 truyền bit 18 thật
+    const latestBits = bits
+        .slice(0, BIT_SIZE)
+        .map(b => b.value || "0")
+        .join("");
+
+    saveHistory(latestBits);
+    updateMarker(latestBits);
 
     input.value = "";
 });
 
 
+function saveHistory(bits17) {
+    const grouped = groupBits(bits17, 5);
 
-function saveHistory() {
-    const current = Array.from(bits)
-        .slice(0, 17)          // ❗ chỉ lấy 17 ô
-        .map(b => b.value || "0")
-        .join("");
-
-    history.unshift(current);
+    history.unshift(grouped);
     history = history.slice(0, 10);
 
     document.getElementById("historyBox").value =
@@ -677,11 +695,17 @@ function saveHistory() {
 }
 
 
+function updateMarker(bitsRaw) {
+    marker.value = groupBits(bitsRaw, 5);
+}
+
+function groupBits(str, size = 5) {
+    return str.match(new RegExp(`.{1,${size}}`, "g")).join("   ");
+}
+
 window.addEventListener("load", () => {
-    const input = document.getElementById("bit-input");
-    if (input) {
-        input.focus();
-    }
+    initRegister();
+    document.getElementById("bit-input").focus();
 });
 
 </script>
