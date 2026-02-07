@@ -88,7 +88,10 @@ button {
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s ease;
-    margin: 15px;
+   margin: 15px auto;
+    display: block;
+        align-items: center;
+    justify-content: center;
 }
 
 button:hover {
@@ -368,6 +371,10 @@ button:active {
             <label>Tổng số bit (cho N dòng):</label>
             <input id="targetBits" type="number" value="15">
         </div>
+         
+         
+         <button onclick="resetRegister()">Reset</button>
+
 
     </div>
 
@@ -700,6 +707,27 @@ function updateMarker(bitsRaw) {
 function groupBits(str, size = 5) {
     return str.match(new RegExp(`.{1,${size}}`, "g")).join("   ");
 }
+
+function resetRegister() {
+    // reset buffer về toàn '-'
+    historyBuffer = Array(BIT_SIZE).fill("-");
+
+    // reset hiển thị register
+    for (let i = 0; i <= BIT_SIZE; i++) {
+        bits[i].value = "-";
+    }
+
+    // reset lịch sử (1 dòng)
+    historyBox.value = groupBits(historyBuffer.join(""), 5);
+
+    // reset marker hiển thị (không đụng input file)
+    updateMarker(historyBuffer.join(""));
+
+    // clear ô nhập bit
+    input.value = "";
+    input.focus();
+}
+
 
 window.addEventListener("load", () => {
     initRegister();
