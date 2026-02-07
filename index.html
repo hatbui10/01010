@@ -345,6 +345,24 @@ button:active {
 }
 
 
+#shift6 {
+    display: flex;
+    gap: 6px;
+}
+
+.bit {
+    width: 36px;
+    height: 36px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.bit-input {
+    border: 2px solid #4f46e5;
+}
+
+
 </style>
 </head>
 
@@ -371,6 +389,27 @@ button:active {
             <label>Tổng số bit (cho N dòng):</label>
             <input id="targetBits" type="number" value="15">
         </div>
+        
+        
+    <div id="shift6">
+    <input class="bit" readonly value="-">
+    <input class="bit" readonly value="-">
+    <input class="bit" readonly value="-">
+    <input class="bit" readonly value="-">
+    <input class="bit" readonly value="-">
+
+    <!-- ô số 6: cho nhập -->
+    <input
+        class="bit bit-input"
+        id="bit6"
+        maxlength="1"
+        inputmode="numeric"
+        pattern="[01]"
+        autocomplete="off"
+        value="-"
+    >
+</div>
+
          
          
          <button onclick="resetRegister()">Reset</button>
@@ -727,6 +766,32 @@ function resetRegister() {
     input.value = "";
     input.focus();
 }
+
+
+const shift6Bits = document.querySelectorAll("#shift6 .bit");
+const bit6Input = document.getElementById("bit6");
+
+// init hiển thị
+shift6Bits.forEach(b => b.value = "-");
+
+bit6Input.value = ""; // ô nhập trống
+
+bit6Input.addEventListener("input", () => {
+    const val = bit6Input.value.replace(/[^01]/g, "");
+    if (!val) return;
+
+    // dịch trái
+    for (let i = 0; i < shift6Bits.length - 1; i++) {
+        shift6Bits[i].value = shift6Bits[i + 1].value;
+    }
+
+    // bit mới vào ô cuối
+    shift6Bits[shift6Bits.length - 1].value = val;
+
+    // clear để nhập tiếp
+    bit6Input.value = "";
+});
+
 
 
 window.addEventListener("load", () => {
