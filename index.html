@@ -107,12 +107,12 @@ button {
 
     <div class="form-group">
         <label>Số dòng liên tiếp (N):</label>
-        <input id="groupSize" type="number" value="">
+        <input id="groupSize" type="number" value="3">
     </div>
 
     <div class="form-group">
         <label>Tổng số bit (cho N dòng):</label>
-        <input id="targetBits" type="number" value="10">
+        <input id="targetBits" type="number" value="15">
     </div>
 
     <!-- CỘT PHẢI -->
@@ -219,9 +219,84 @@ function jump(n) {
 function markerValue() {
     return document.getElementById("marker").value.trim();
 }
+function analyze(lines) {
+    const N = +groupSize.value;
+    const target = +targetBits.value;
+    const K = +bitCount.value;
+    const pattern = document.getElementById("pattern").value.trim();
+    const preview = document.getElementById("preview");
+
+    let bitLen = lines.map(l => {
+        let s = l.split(/\s+/)[1] || "";
+        return markerValue().length + s.length;
+    });
+
+    let matchGroup = Array(lines.length).fill(false);
+    let matchN = Array(lines.length).fill(false);
+    let hits = [];
+
+    for (let i = 0; i <= lines.length - N; i++) {
+        let sum = 0;
+        for (let j = 0; j < N; j++) sum += bitLen[i + j];
+        if (sum === target) {
+            for (let j = 0; j < N; j++) matchGroup[i + j] = true;
+            hits.push(i + 1);
+        }
+    }
+
+    lines.forEach((l, i) => {
+        let suffix = l.split(/\s+/)[1] || "";
+        if (suffix.length >= K &&
+            pattern.length === K &&
+            suffix.substring(0, K) === pattern) {
+            matchN[i] = true;
+        }
+    });
+
+    preview.innerHTML = "";
+
+    let outputLines = [];
+
+    lines.forEach((l, i) => {
+        const div = document.createElement("div");
+        div.id = "line-" + (i + 1);
+        div.className = "line " +
+            (matchGroup[i] ? "matchGroup" :
+             matchN[i] ? "matchN" : "normal");
+
+        const text = `#${i+1}  ${l}`;
+        div.textContent = text;
+        preview.appendChild(div);
+
+        // ghi ra file
+        let tag =
+            matchGroup[i] ? "[GROUP]" :
+            matchN[i] ? "[K-BIT]" : "[OK]";
+
+        outputLines.push(`${tag} ${text}`);
+    });
+
+    summary.textContent =
+        `Tổng dòng: ${lines.length} | Nhóm khớp: ${hits.length}`;
+
+    positions.innerHTML =
+        hits.map(i => `<span class="jump" onclick="jump(${i})">#${i}</span>`).join("");
+
+    // 🔽 TẠO & TẢI FILE TXT
+    const blob = new Blob([outputLines.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ket_qua_phan_tich.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+}
 </script>
 
 </body>
 </html>
-
 
