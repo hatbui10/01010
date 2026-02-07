@@ -5,44 +5,197 @@
 <title>Tách & phân tích chuỗi bit</title>
 
 <style>
+/* ===== NỀN + BODY ===== */
 body {
     font-family: "Segoe UI", Arial, sans-serif;
     padding: 40px;
-    background: #0b1220;
+    background:
+        radial-gradient(1200px 600px at 10% -10%, #1e293b 0%, transparent 60%),
+        radial-gradient(800px 500px at 90% 10%, #0f172a 0%, transparent 55%),
+        #020617;
     color: #e5e7eb;
 }
 
-h2 { color: #93c5fd; }
+/* ===== TIÊU ĐỀ ===== */
+h2 {
+    color: #93c5fd;
+    font-size: 28px;
+    margin-bottom: 24px;
+    letter-spacing: 0.5px;
+}
 
+/* ===== INPUT CHUNG ===== */
 input {
     padding: 10px 12px;
     font-size: 15px;
-    width: 260px;
-    border-radius: 8px;
+    width: 100%;
+    border-radius: 10px;
     border: 1px solid #334155;
-    background: #020617;
+    background: linear-gradient(180deg, #020617, #020617);
     color: #e5e7eb;
-    margin-bottom: 10px;
+    transition: all 0.2s ease;
 }
 
+input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.35);
+    outline: none;
+}
+
+/* ===== BUTTON ===== */
 button {
     padding: 12px 26px;
-    font-size: 16px;
+    font-size: 15px;
     border-radius: 999px;
     border: none;
     background: linear-gradient(135deg, #6366f1, #4f46e5);
     color: #fff;
     cursor: pointer;
     font-weight: 600;
-    margin: 35px;
+    transition: all 0.2s ease;
 }
 
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(79,70,229,0.4);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* ===== GRID 3 CỘT ===== */
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr)
+                           minmax(280px, 1fr)
+                           minmax(360px, 1.2fr);
+    gap: 32px;
+    max-width: 1280px;
+    margin: 0 auto;
+    align-items: start; /* QUAN TRỌNG */
+}
+
+.form-col {
+    background: linear-gradient(180deg, #020617, #020617);
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    padding: 20px 22px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    min-width: 0;        /* CHỐNG TRÀN */
+    overflow: hidden;    /* CHỐNG ĐÈ */
+}
+.form-col input,
+.form-col textarea,
+.form-col button {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* ===== LABEL ===== */
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #c7d2fe;
+}
+
+/* ===== SHIFT REGISTER ===== */
+#shift-register {
+    display: grid;
+    grid-template-columns: repeat(18, 36px);
+    gap: 6px;
+
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+#shift-register::-webkit-scrollbar {
+    height: 6px;
+}
+#shift-register::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+@media (max-width: 1100px) {
+    .form-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== BIT ===== */
+.bit {
+    width: 34px;
+    height: 34px;
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    border-radius: 6px;
+    background: #020617;
+    border: 1px solid #334155;
+    color: #94a3b8;
+}
+
+/* ===== Ô 18 (NHẬP) ===== */
+#bit-input {
+    background: linear-gradient(135deg, #0f172a, #020617);
+    color: #38bdf8;
+    border: 2px solid #38bdf8;
+    font-size: 18px;
+    font-weight: 700;
+    box-shadow:
+        0 0 0 2px rgba(56,189,248,0.25),
+        inset 0 0 8px rgba(56,189,248,0.15);
+}
+
+#bit-input:focus {
+    box-shadow:
+        0 0 0 2px rgba(56,189,248,0.6),
+        0 0 18px rgba(56,189,248,0.9);
+    transform: scale(1.08);
+}
+
+/* ===== HISTORY BOX ===== */
+#historyBox {
+    width: 100%;
+    min-height: 160px;
+    padding: 12px 14px;
+    background: #020617;
+    color: #e5e7eb;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+/* ===== SCROLLBAR ===== */
+#historyBox::-webkit-scrollbar {
+    width: 8px;
+}
+#historyBox::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+#historyBox::-webkit-scrollbar-track {
+    background: #020617;
+}
+
+/* ===== PREVIEW ===== */
 #preview {
     margin-top: 24px;
     max-height: 420px;
     overflow: auto;
 }
 
+/* ===== DÒNG ===== */
 .line {
     font-family: "JetBrains Mono", Consolas, monospace;
     padding: 6px 10px;
@@ -65,10 +218,33 @@ button {
     font-weight: 700;
 }
 
+/* ===== INFO ===== */
 .info {
-    margin-top: 14px;
+    margin-top: 18px;
+    padding: 12px 16px;
+
     font-weight: 600;
-    color: #93c5fd;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+
+    color: #c7d2fe;
+    background:
+        linear-gradient(180deg, rgba(30,41,59,0.65), rgba(2,6,23,0.9));
+
+    border: 1px solid rgba(99,102,241,0.35);
+    border-radius: 14px;
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.2s ease;
 }
 
 .jump {
@@ -78,62 +254,57 @@ button {
     text-decoration: underline;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px 24px;
-    max-width: 560px;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 4px;
-    font-weight: 600;
-    color: #c7d2fe;
-}
-#shift-register {
-  display: grid;
-  grid-template-columns: repeat(18, 36px);
-  gap: 6px;
-}
+/* Khung bảng kết quả */
+.result-panel {
+    margin-top: 20px;
+    padding: 14px;
 
-.bit {
-  width: 34px;
-  height: 34px;
-  text-align: center;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 16px;
-  padding: 0;
-  margin: 0;
-  border-radius: 6px;
+    background: linear-gradient(180deg, #020617, #020617);
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+
+    max-height: 420px;
+    overflow-y: auto;
+
+    box-shadow:
+        0 12px 32px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
+/* từng dòng trong bảng */
+.result-panel .line {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 14px;
 
-/* Ô 18 – ô nhập */
-#bit-input {
-  width: 36px;
-  height: 36px;
-  text-align: center;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 18px;
-  font-weight: 700;
+    padding: 8px 10px;
+    margin-bottom: 6px;
 
-  background: linear-gradient(135deg, #1e293b, #020617);
-  color: #38bdf8;
+    border-radius: 10px;
+    white-space: pre;
 
-  border: 2px solid #38bdf8;
-  border-radius: 8px;
-
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(56,189,248,0.25);
+    transition: all 0.15s ease;
 }
 
-/* Khi đang focus */
-#bit-input:focus {
-  box-shadow:
-    0 0 0 2px rgba(56,189,248,0.6),
-    0 0 14px rgba(56,189,248,0.8);
-  transform: scale(1.05);
+/* hover cho dễ đọc */
+.result-panel .line:hover {
+    transform: translateX(4px);
+    filter: brightness(1.1);
 }
+
+/* scrollbar cho đỡ đau mắt */
+.result-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.result-panel::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+.result-panel::-webkit-scrollbar-track {
+    background: #020617;
+}
+
 
 </style>
 </head>
@@ -142,81 +313,101 @@ button {
 
 <h2>Tách & phân tích chuỗi bit</h2>
 
-<div class="form-grid">
+<div class="form-grid-3">
 
-    <!-- CỘT TRÁI -->
-    <div class="form-group">
-        <label>Marker:</label>
-        <input id="marker" value="1000">
+    <!-- ===== CỘT 1: THÔNG SỐ CHÍNH ===== -->
+    <div class="form-col">
+
+        <div class="form-group">
+            <label>Marker:</label>
+            <input id="marker" value="1000">
+        </div>
+
+        <div class="form-group">
+            <label>Số dòng liên tiếp (N):</label>
+            <input id="groupSize" type="number" value="1">
+        </div>
+
+        <div class="form-group">
+            <label>Tổng số bit (cho N dòng):</label>
+            <input id="targetBits" type="number" value="15">
+        </div>
+
     </div>
 
-    <div class="form-group">
-        <label>Số dòng liên tiếp (N):</label>
-        <input id="groupSize" type="number" value="1">
+    <!-- ===== CỘT 2: ĐIỀU KIỆN TÌM KIẾM ===== -->
+    <div class="form-col">
+
+        <div class="form-group">
+            <label>Số bit cần kiểm tra sau marker (K):</label>
+            <input id="bitCount" type="number" value="5">
+        </div>
+
+        <div class="form-group">
+            <label>Chuỗi bit cần tìm:</label>
+            <input id="pattern" placeholder="vd: 01000">
+        </div>
+
+        <div class="form-group">
+            <label>Chọn file TXT:</label>
+            <input type="file" id="fileInput" accept=".txt">
+        </div>
+
+        <div class="form-actions">
+            <button onclick="processFile()">Xử lý</button>
+            <button onclick="downloadTXT()">Tải file TXT</button>
+        </div>
+
     </div>
 
-    <div class="form-group">
-        <label>Tổng số bit (cho N dòng):</label>
-        <input id="targetBits" type="number" value="15">
-    </div>
+    <!-- ===== CỘT 3: SHIFT REGISTER + LỊCH SỬ ===== -->
+    <div class="form-col">
 
-    <!-- CỘT PHẢI -->
-    <div class="form-group">
-        <label>Số bit cần kiểm tra sau marker (K):</label>
-        <input id="bitCount" type="number" value="5">
-    </div>
+        <label>Thanh dịch 18 bit:</label>
+        <div id="shift-register">
+            <!-- 17 ô readonly -->
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
+            <input class="bit" readonly>
 
-    <div class="form-group">
-        <label>Chuỗi bit cần tìm:</label>
-        <input id="pattern" placeholder="vd: 01000">
-    </div>
+            <!-- Ô 18 nhập -->
+            <input
+                class="bit bit-input"
+                id="bit-input"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[01]"
+                autocomplete="off">
+        </div>
 
-    <div class="form-group">
-        <label>Chọn file TXT:</label>
-        <input type="file" id="fileInput" accept=".txt">
-    </div>
-    
-    <div id="shift-register">
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
-  <input class="bit" readonly>
+        <label style="margin-top:12px;">Lịch sử 17 bit:</label>
+        <textarea
+            id="historyBox"
+            placeholder="Lịch sử 17 bit sẽ hiện ở đây…"
+            readonly>
+        </textarea>
 
-  <!-- Ô 18 -->
-  <input
-  class="bit"
-  id="bit-input"
-  maxlength="1"
-  inputmode="numeric"
-  pattern="[01]"
-  autocomplete="off">
+    </div>
 
 </div>
-
-
-</div>
-
-<button onclick="processFile()">Xử lý</button>
-<button onclick="downloadTXT()">Tải file TXT</button>
 
 <div class="info" id="summary"></div>
 <div class="info" id="positions"></div>
-<div id="preview"></div>
-
-
+<div id="preview" class="result-panel"></div>
 
 <script>
 let lastOutputText = "";
@@ -421,40 +612,33 @@ let history = []; // lưu các dãy 18 bit
 
 input.addEventListener("input", () => {
     const val = input.value.replace(/[^01]/g, "");
-    if (!val) {
-        input.value = "";
-        return;
-    }
+    if (!val) return;
 
-    // DỊCH TRÁI
     for (let i = 0; i < 17; i++) {
         bits[i].value = bits[i + 1].value;
     }
 
-    bits[17].value = val; // bit mới vào ô 18
-    input.value = "";     // chỉ xóa ô nhập
+    bits[17].value = val;
 
-    saveHistory();
+    saveHistory(val); // 👈 truyền bit 18 thật
+
+    input.value = "";
 });
 
-function saveHistory() {
-    const snapshot = [...bits].map(b => b.value).join("");
-    history.unshift(snapshot);
-    history = history.slice(0, 50); // ví dụ: giữ 50 bản ghi
-}
 
 
 function saveHistory() {
     const current = Array.from(bits)
+        .slice(0, 17)          // ❗ chỉ lấy 17 ô
         .map(b => b.value || "0")
         .join("");
 
-    if (current.length === 18) {
-        history = [current]; // chỉ giữ 1 bản ghi
-        console.log("LỊCH SỬ:", history[0]);
-    }
-}
+    history.unshift(current);
+    history = history.slice(0, 10);
 
+    document.getElementById("historyBox").value =
+        history.join("\n");
+}
 
 
 window.addEventListener("load", () => {
