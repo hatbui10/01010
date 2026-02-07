@@ -34,6 +34,7 @@ button {
     color: #fff;
     cursor: pointer;
     font-weight: 600;
+    margin: 35px;
 }
 
 #preview {
@@ -89,6 +90,50 @@ button {
     font-weight: 600;
     color: #c7d2fe;
 }
+#shift-register {
+  display: grid;
+  grid-template-columns: repeat(18, 36px);
+  gap: 6px;
+}
+
+.bit {
+  width: 34px;
+  height: 34px;
+  text-align: center;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 16px;
+  padding: 0;
+  margin: 0;
+  border-radius: 6px;
+}
+
+
+/* Ô 18 – ô nhập */
+#bit-input {
+  width: 36px;
+  height: 36px;
+  text-align: center;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 18px;
+  font-weight: 700;
+
+  background: linear-gradient(135deg, #1e293b, #020617);
+  color: #38bdf8;
+
+  border: 2px solid #38bdf8;
+  border-radius: 8px;
+
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(56,189,248,0.25);
+}
+
+/* Khi đang focus */
+#bit-input:focus {
+  box-shadow:
+    0 0 0 2px rgba(56,189,248,0.6),
+    0 0 14px rgba(56,189,248,0.8);
+  transform: scale(1.05);
+}
 
 </style>
 </head>
@@ -130,6 +175,37 @@ button {
         <label>Chọn file TXT:</label>
         <input type="file" id="fileInput" accept=".txt">
     </div>
+    
+    <div id="shift-register">
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+  <input class="bit" readonly>
+
+  <!-- Ô 18 -->
+  <input
+  class="bit"
+  id="bit-input"
+  maxlength="1"
+  inputmode="numeric"
+  pattern="[01]"
+  autocomplete="off">
+
+</div>
+
 
 </div>
 
@@ -334,6 +410,60 @@ function markerValue() {
     const raw = document.getElementById("marker").value;
     return raw.replace(/[^01]/g, "");
 }
+
+
+
+
+const bits = document.querySelectorAll("#shift-register .bit");
+const input = document.getElementById("bit-input");
+
+let history = []; // lưu các dãy 18 bit
+
+input.addEventListener("input", () => {
+    const val = input.value.replace(/[^01]/g, "");
+    if (!val) {
+        input.value = "";
+        return;
+    }
+
+    // DỊCH TRÁI
+    for (let i = 0; i < 17; i++) {
+        bits[i].value = bits[i + 1].value;
+    }
+
+    bits[17].value = val; // bit mới vào ô 18
+    input.value = "";     // chỉ xóa ô nhập
+
+    saveHistory();
+});
+
+function saveHistory() {
+    const snapshot = [...bits].map(b => b.value).join("");
+    history.unshift(snapshot);
+    history = history.slice(0, 50); // ví dụ: giữ 50 bản ghi
+}
+
+
+function saveHistory() {
+    const current = Array.from(bits)
+        .map(b => b.value || "0")
+        .join("");
+
+    if (current.length === 18) {
+        history = [current]; // chỉ giữ 1 bản ghi
+        console.log("LỊCH SỬ:", history[0]);
+    }
+}
+
+
+
+window.addEventListener("load", () => {
+    const input = document.getElementById("bit-input");
+    if (input) {
+        input.focus();
+    }
+});
+
 </script>
 
 </body>
