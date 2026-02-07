@@ -812,10 +812,18 @@ bit6Input.addEventListener("input", () => {
             return r.text();
         })
         .then(text => {
-            processRawText(text); // 👈 QUAN TRỌNG
-        })
+    resetShift6();      // 👈 reset 6 ô
+    processRawText(text);
+    bit6Input.focus(); // 👈 tự động focus vào ô nhập 6
+})
         .catch(err => alert("Lỗi IPFS: " + err.message));
 }
+
+function resetShift6() {
+    shift6Bits.forEach(b => b.value = "-");
+    bit6Input.value = "";
+}
+
 
 
 window.addEventListener("load", () => {
