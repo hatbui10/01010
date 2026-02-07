@@ -112,7 +112,7 @@ button {
 
     <div class="form-group">
         <label>Tổng số bit (cho N dòng):</label>
-        <input id="targetBits" type="number" value="10">
+        <input id="targetBits" type="number" value="15">
     </div>
 
     <!-- CỘT PHẢI -->
@@ -331,11 +331,11 @@ function jump(n) {
 }
 
 function markerValue() {
-    return document.getElementById("marker").value.trim();
+    const raw = document.getElementById("marker").value;
+    return raw.replace(/[^01]/g, "");
 }
 </script>
 
 </body>
 </html>
-
 
