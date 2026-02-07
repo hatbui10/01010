@@ -129,12 +129,14 @@ button:active {
     min-width: 0;        /* CHỐNG TRÀN */
     overflow: hidden;    /* CHỐNG ĐÈ */
 }
-.form-col input,
+
+
+.form-col > .form-group input,
 .form-col textarea,
 .form-col button {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
+    width: 60%;
+     text-align: center;
+
 }
 
 /* ===== LABEL ===== */
@@ -148,13 +150,12 @@ button:active {
 /* ===== SHIFT REGISTER ===== */
 #shift-register {
     display: grid;
-    grid-template-columns: repeat(18, 36px);
+    grid-template-columns: repeat(auto-fill, 36px);
     gap: 6px;
-
-    max-width: 100%;
-    overflow-x: auto;
-    padding-bottom: 6px;
 }
+
+
+
 #shift-register::-webkit-scrollbar {
     height: 6px;
 }
@@ -170,8 +171,8 @@ button:active {
 
 /* ===== BIT ===== */
 .bit {
-    width: 34px;
-    height: 34px;
+    width: 24px;
+    height: 24px;
     text-align: center;
     font-family: "JetBrains Mono", monospace;
     font-size: 15px;
@@ -179,6 +180,7 @@ button:active {
     background: #020617;
     border: 1px solid #334155;
     color: #94a3b8;
+    padding: 5px;
 }
 
 /* ===== Ô 18 (NHẬP) ===== */
@@ -202,7 +204,7 @@ button:active {
 
 /* ===== HISTORY BOX ===== */
 #historyBox {
-    width: 100%;
+    width: 80%;
     min-height: 160px;
     padding: 12px 14px;
     background: #020617;
@@ -213,7 +215,8 @@ button:active {
     font-size: 14px;
     line-height: 1.6;
     resize: vertical;
-}
+    margin: 0 auto;
+   }
 
 /* ===== SCROLLBAR ===== */
 #historyBox::-webkit-scrollbar {
@@ -351,8 +354,8 @@ button:active {
 }
 
 .bit {
-    width: 36px;
-    height: 36px;
+    width: 30px;
+    height: 30px;
     text-align: center;
     font-size: 18px;
     font-weight: 600;
@@ -360,6 +363,12 @@ button:active {
 
 .bit-input {
     border: 2px solid #4f46e5;
+}
+
+.bit-input6 {
+    border: 2px solid #4f46e5;
+    text-align: center;
+    margin: 0 auto;
 }
 
 
@@ -461,7 +470,7 @@ button:active {
 
     <input
         id="bit-input"
-        class="bit bit-input"
+        class="bit bit-input6"
         maxlength="1"
         inputmode="numeric"
         pattern="[01]"
