@@ -437,8 +437,13 @@ button:active {
 
         <div class="form-actions">
             <button onclick="processFile()">Xử lý</button>
-            <button onclick="downloadTXT()">Tải file TXT</button>
+            <button onclick="downloadTXT()">Tải xuống file TXT</button>
         </div>
+        
+       <button onclick="loadDefault()">Dùng file IPFS</button>
+      
+      
+
 
     </div>
 
@@ -511,51 +516,43 @@ function initRegister() {
 }
 
 
-
-
 function processFile() {
-    const marker = markerValue();
     const file = document.getElementById("fileInput").files[0];
-    const K = +bitCount.value;
-
-    if (!marker || !file) {
-        alert("Thiếu marker hoặc file");
-        return;
-    }
+    if (!file) return alert("Chưa chọn file");
 
     const reader = new FileReader();
-    reader.onload = e => {
-        const raw = e.target.result.replace(/\s+/g, "");
-        let lines = [];
-        let i = 0;
-
-        while (i <= raw.length - marker.length) {
-            if (raw.substr(i, marker.length) === marker) {
-                const start = i + marker.length;
-                const firstBits = raw.substr(start, K);
-
-                // 🔥 tìm marker kế tiếp
-                let nextMarker = raw.indexOf(marker, start + K);
-                if (nextMarker === -1) nextMarker = raw.length;
-
-                const rest = raw.substring(start + K, nextMarker);
-
-                lines.push(
-                    marker + "    " + firstBits + "    " + rest
-                );
-
-                i = nextMarker;
-            } else {
-                i++;
-            }
-        }
-
-        analyze(lines);
-    };
-
+    reader.onload = e => processRawText(e.target.result);
     reader.readAsText(file);
 }
 
+
+function processRawText(raw) {
+    raw = raw.replace(/\s+/g, "");
+    const marker = markerValue();
+    const K = +bitCount.value;
+
+    let lines = [];
+    let i = 0;
+
+    while (i <= raw.length - marker.length) {
+        if (raw.substr(i, marker.length) === marker) {
+            const start = i + marker.length;
+            const firstBits = raw.substr(start, K);
+
+            let nextMarker = raw.indexOf(marker, start + K);
+            if (nextMarker === -1) nextMarker = raw.length;
+
+            const rest = raw.substring(start + K, nextMarker);
+
+            lines.push(marker + "    " + firstBits + "    " + rest);
+            i = nextMarker;
+        } else {
+            i++;
+        }
+    }
+
+    analyze(lines);
+}
 
 
 
@@ -792,6 +789,24 @@ bit6Input.addEventListener("input", () => {
     bit6Input.value = "";
 });
 
+  
+  
+  
+  const DEFAULT_FILE_URL =
+"https://tomato-delicate-zebra-533.mypinata.cloud/ipfs/bafybeidlqhc3nf5ygzssmbmpzalssf3qk3errgudbcgvzvamq5yg3lsjh4";
+
+
+  function loadDefault() {
+    fetch(DEFAULT_FILE_URL)
+        .then(r => {
+            if (!r.ok) throw new Error("Không tải được IPFS");
+            return r.text();
+        })
+        .then(text => {
+            processRawText(text); // 👈 QUAN TRỌNG
+        })
+        .catch(err => alert("Lỗi IPFS: " + err.message));
+}
 
 
 window.addEventListener("load", () => {
