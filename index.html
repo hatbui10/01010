@@ -107,12 +107,12 @@ button {
 
     <div class="form-group">
         <label>Số dòng liên tiếp (N):</label>
-        <input id="groupSize" type="number" value="1">
+        <input id="groupSize" type="number" value="3">
     </div>
 
     <div class="form-group">
         <label>Tổng số bit (cho N dòng):</label>
-        <input id="targetBits" type="number" value="10">
+        <input id="targetBits" type="number" value="15">
     </div>
 
     <!-- CỘT PHẢI -->
@@ -134,15 +134,24 @@ button {
 </div>
 
 <button onclick="processFile()">Xử lý</button>
+<button onclick="downloadTXT()">Tải file TXT</button>
 
 <div class="info" id="summary"></div>
 <div class="info" id="positions"></div>
 <div id="preview"></div>
+
+
+
 <script>
+let lastOutputText = "";
+
 function processFile() {
     const marker = markerValue();
     const file = document.getElementById("fileInput").files[0];
-    if (!marker || !file) return alert("Thiếu marker hoặc file");
+    if (!marker || !file) {
+        alert("Thiếu marker hoặc file");
+        return;
+    }
 
     const reader = new FileReader();
     reader.onload = e => {
@@ -162,7 +171,10 @@ function analyze(lines) {
     const target = +targetBits.value;
     const K = +bitCount.value;
     const pattern = document.getElementById("pattern").value.trim();
+
     const preview = document.getElementById("preview");
+    const summary = document.getElementById("summary");
+    const positions = document.getElementById("positions");
 
     let bitLen = lines.map(l => {
         let s = l.split(/\s+/)[1] || "";
@@ -172,104 +184,41 @@ function analyze(lines) {
     let matchGroup = Array(lines.length).fill(false);
     let matchN = Array(lines.length).fill(false);
     let hits = [];
-
-    // nhóm N dòng
-    for (let i = 0; i <= lines.length - N; i++) {
-        let sum = 0;
-        for (let j = 0; j < N; j++) sum += bitLen[i + j];
-        if (sum === target) {
-            for (let j = 0; j < N; j++) matchGroup[i + j] = true;
-            hits.push(i + 1);
-        }
-    }
-
-    // kiểm tra K bit sau marker
-    lines.forEach((l, i) => {
-        let suffix = l.split(/\s+/)[1] || "";
-        if (suffix.length >= K &&
-            pattern.length === K &&
-            suffix.substring(0, K) === pattern) {
-            matchN[i] = true;
-        }
-    });
-
-    preview.innerHTML = "";
-    lines.forEach((l, i) => {
-        const div = document.createElement("div");
-        div.id = "line-" + (i + 1);
-        div.className = "line " +
-            (matchGroup[i] ? "matchGroup" :
-             matchN[i] ? "matchN" : "normal");
-        div.textContent = `#${i+1}  ${l}`;
-        preview.appendChild(div);
-    });
-
-    summary.textContent =
-        `Tổng dòng: ${lines.length} | Nhóm khớp: ${hits.length}`;
-
-    positions.innerHTML =
-        hits.map(i => `<span class="jump" onclick="jump(${i})">#${i}</span>`).join("");
-}
-
-function jump(n) {
-    document.getElementById("line-" + n)
-        .scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
-function markerValue() {
-    return document.getElementById("marker").value.trim();
-}
-function analyze(lines) {
-    const N = +groupSize.value;
-    const target = +targetBits.value;
-    const K = +bitCount.value;
-    const pattern = document.getElementById("pattern").value.trim();
-    const preview = document.getElementById("preview");
-
-    let bitLen = lines.map(l => {
-        let s = l.split(/\s+/)[1] || "";
-        return markerValue().length + s.length;
-    });
-
-    let matchGroup = Array(lines.length).fill(false);
-    let matchN = Array(lines.length).fill(false);
-    let hits = [];
-
-    for (let i = 0; i <= lines.length - N; i++) {
-        let sum = 0;
-        for (let j = 0; j < N; j++) sum += bitLen[i + j];
-        if (sum === target) {
-            for (let j = 0; j < N; j++) matchGroup[i + j] = true;
-            hits.push(i + 1);
-        }
-    }
-
-    lines.forEach((l, i) => {
-        let suffix = l.split(/\s+/)[1] || "";
-        if (suffix.length >= K &&
-            pattern.length === K &&
-            suffix.substring(0, K) === pattern) {
-            matchN[i] = true;
-        }
-    });
-
-    preview.innerHTML = "";
-
     let outputLines = [];
 
+    for (let i = 0; i <= lines.length - N; i++) {
+        let sum = 0;
+        for (let j = 0; j < N; j++) sum += bitLen[i + j];
+        if (sum === target) {
+            for (let j = 0; j < N; j++) matchGroup[i + j] = true;
+            hits.push(i + 1);
+        }
+    }
+
+    lines.forEach((l, i) => {
+        let suffix = l.split(/\s+/)[1] || "";
+        if (suffix.length >= K &&
+            pattern.length === K &&
+            suffix.substring(0, K) === pattern) {
+            matchN[i] = true;
+        }
+    });
+
+    preview.innerHTML = "";
+
     lines.forEach((l, i) => {
         const div = document.createElement("div");
         div.id = "line-" + (i + 1);
-        div.className = "line " +
+        div.className =
+            "line " +
             (matchGroup[i] ? "matchGroup" :
              matchN[i] ? "matchN" : "normal");
 
-        const text = `#${i+1}  ${l}`;
+        const text = `#${i + 1}  ${l}`;
         div.textContent = text;
         preview.appendChild(div);
 
-        // ghi ra file
-        let tag =
+        const tag =
             matchGroup[i] ? "[GROUP]" :
             matchN[i] ? "[K-BIT]" : "[OK]";
 
@@ -280,10 +229,20 @@ function analyze(lines) {
         `Tổng dòng: ${lines.length} | Nhóm khớp: ${hits.length}`;
 
     positions.innerHTML =
-        hits.map(i => `<span class="jump" onclick="jump(${i})">#${i}</span>`).join("");
+        hits.map(i =>
+            `<span class="jump" onclick="jump(${i})">#${i}</span>`
+        ).join("");
 
-    // 🔽 TẠO & TẢI FILE TXT
-    const blob = new Blob([outputLines.join("\n")], { type: "text/plain" });
+    lastOutputText = outputLines.join("\n");
+}
+
+function downloadTXT() {
+    if (!lastOutputText) {
+        alert("Chưa có kết quả. Hãy bấm Xử lý trước.");
+        return;
+    }
+
+    const blob = new Blob([lastOutputText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
@@ -295,9 +254,17 @@ function analyze(lines) {
 
     URL.revokeObjectURL(url);
 }
+
+function jump(n) {
+    document.getElementById("line-" + n)
+        .scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function markerValue() {
+    return document.getElementById("marker").value.trim();
+}
 </script>
 
 </body>
 </html>
-
 
