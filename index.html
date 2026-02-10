@@ -632,6 +632,7 @@ function analyze(lines) {
    // ===== CHECK BIT LIÊN TIẾP =====
 const M = +document.getElementById("sameBitCount").value;
 const sameBitMatch = Array(lines.length).fill(false);
+const sameBitStart = Array(lines.length).fill(false);
 
 let prevBit = null;
 let count = 0;
@@ -647,12 +648,19 @@ for (let i = 0; i < lines.length; i++) {
         prevBit = bit;
     }
 
-    // nếu đủ M dòng liên tiếp
-    if (count >= M) {
-        // đánh dấu M dòng gần nhất
-        for (let j = i - M + 1; j <= i; j++) {
+    // vừa đủ M → đây là DÒNG ĐẦU TIÊN CỦA CHUỖI
+    if (count === M) {
+        const start = i - M + 1;
+        sameBitStart[start] = true;
+
+        for (let j = start; j <= i; j++) {
             sameBitMatch[j] = true;
         }
+    }
+
+    // nếu dài hơn M → chỉ tô màu, KHÔNG thêm start
+    if (count > M) {
+        sameBitMatch[i] = true;
     }
 }
 
@@ -748,7 +756,7 @@ for (let i = 0; i < lines.length; i++) {
 
 
 const sameBitLines = [];
-sameBitMatch.forEach((v, i) => {
+sameBitStart.forEach((v, i) => {
     if (v) sameBitLines.push(i + 1);
 });
 
