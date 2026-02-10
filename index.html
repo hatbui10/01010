@@ -434,6 +434,14 @@ button:active {
             <label>Số bit cần kiểm tra sau marker (K):</label>
             <input id="bitCount" type="number" value="5">
         </div>
+        
+         <div class="form-group">
+    <label>Số dòng có bit giống nhau (M):</label>
+    <input id="sameBitCount" type="number" value="3" min="2">
+</div>
+
+
+
 
         <div class="form-group">
             <label>Chuỗi bit cần tìm:</label>
@@ -453,7 +461,7 @@ button:active {
 
        <button onclick="loadDefault()">Dùng file IPFS</button>
       
-      
+     
 
 
     </div>
@@ -586,6 +594,47 @@ function analyze(lines) {
     const hits = [];
     const outputLines = [];
 
+
+
+
+
+
+
+  
+   // ===== CHECK BIT LIÊN TIẾP =====
+const M = +document.getElementById("sameBitCount").value;
+const sameBitMatch = Array(lines.length).fill(false);
+
+let prevBit = null;
+let count = 0;
+
+for (let i = 0; i < lines.length; i++) {
+    const parts = lines[i].split(/\s+/);
+    const bit = parts[1] || "";
+
+    if (bit === prevBit) {
+        count++;
+    } else {
+        count = 1;
+        prevBit = bit;
+    }
+
+    // nếu đủ M dòng liên tiếp
+    if (count >= M) {
+        // đánh dấu M dòng gần nhất
+        for (let j = i - M + 1; j <= i; j++) {
+            sameBitMatch[j] = true;
+        }
+    }
+}
+
+
+
+
+
+    
+    
+
     // 1️⃣ tách & tính độ dài bit + kiểm tra K-bit
     lines.forEach((l, i) => {
         const parts = l.split(/\s+/);
@@ -624,10 +673,13 @@ function analyze(lines) {
     lines.forEach((l, i) => {
         const div = document.createElement("div");
         div.id = "line-" + (i + 1);
-        div.className =
-            "line " +
-            (matchGroup[i] ? "matchGroup" :
-             matchN[i] ? "matchN" : "normal");
+        
+        
+       div.className =
+    "line " +
+    (sameBitMatch[i] ? "matchGroup" :
+     matchGroup[i] ? "matchGroup" :
+     matchN[i] ? "matchN" : "normal");
 
         const text = `#${i + 1}  ${l}`;
         div.textContent = text;
@@ -663,7 +715,24 @@ function analyze(lines) {
     ${kbitLines.map(i =>
         `<span class="jump" onclick="jump(${i})">#${i}</span>`
     ).join(" ")}
+    
 `;
+
+
+const sameBitLines = [];
+sameBitMatch.forEach((v, i) => {
+    if (v) sameBitLines.push(i + 1);
+});
+
+summary.innerHTML += `
+<br>
+BIT GIỐNG NHAU: <b>${sameBitLines.length}</b>
+${sameBitLines.map(i =>
+    `<span class="jump" onclick="jump(${i})">#${i}</span>`
+).join(" ")}
+`;
+
+
 
     positions.innerHTML =
         hits.map(i =>
@@ -671,6 +740,9 @@ function analyze(lines) {
         ).join("");
 
     lastOutputText = outputLines.join("\n");
+    
+      
+    
 }
 
 
