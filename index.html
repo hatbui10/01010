@@ -205,18 +205,20 @@ button:active {
 /* ===== HISTORY BOX ===== */
 #historyBox {
     width: 80%;
-    min-height: 160px;
-    padding: 12px 14px;
+    height: 22px;
+    padding: 10px 15px;
     background: #020617;
     color: #e5e7eb;
     border: 1px solid #334155;
-    border-radius: 12px;
+    border-radius: 6px;
     font-family: "JetBrains Mono", Consolas, monospace;
-    font-size: 14px;
-    line-height: 1.6;
-    resize: vertical;
-    margin: 0 auto;
-   }
+    font-size: 20px;
+    line-height: 22px;   /* 👈 bí kíp */
+    text-align: center; /* nếu muốn */
+     margin: 0 auto;
+}
+   
+   margin: 0 auto;
 
 /* ===== SCROLLBAR ===== */
 #historyBox::-webkit-scrollbar {
@@ -409,8 +411,8 @@ button:active {
 
 
 .oppositebit-box {
-  margin-top: 10px;
-  }
+   margin-top: 10px;
+}
 
 .oppositebit-list {
    margin-top: 6px;
@@ -439,6 +441,10 @@ button:active {
 
 <div class="form-grid-3">
 
+
+
+<div id="inputSection">
+
     <!-- ===== CỘT 1: THÔNG SỐ CHÍNH ===== -->
     <div class="form-col">
 
@@ -457,8 +463,51 @@ button:active {
             <input id="targetBits" type="number" value="15">
         </div>
         
+
+    </div>
+     </div>
+
+
+
+
+
+    <!-- ===== CỘT 2: ĐIỀU KIỆN TÌM KIẾM ===== -->
+    <div class="form-col">
+
+        <div class="form-group">
+            <label>Số bit cần kiểm tra sau marker (K):</label>
+            <input id="bitCount" type="number" value="5">
+        </div>
         
-    <div id="shift6">
+        
+        
+        
+         <div class="form-group">
+    <label>Số dòng kiểm tra có K bit giống nhau (M):</label>
+    <input id="sameBitCount"
+       type="number"
+       value="3"
+       min="2"
+       onchange="analyze()">
+
+</div>
+
+
+
+
+
+<div class="control-box">
+    <label>
+        Số dòng kiểm tra:
+      <input type="number" id="lineCountInput" value="6" min="2"
+       style="width:60px;" onchange="analyze()">
+    </label>
+
+    <button id="btnSame" class="active" onclick="toggleSame()">🔵 Tìm giống nhau</button>
+    <button id="btnOpposite" onclick="toggleOpposite()">🔴 Tìm ngược nhau</button>
+</div>
+
+ <div id="shift6">
     <input class="bit" readonly value="-">
     <input class="bit" readonly value="-">
     <input class="bit" readonly value="-">
@@ -482,41 +531,6 @@ button:active {
          <button onclick="resetRegister()">Reset</button>
 
 
-    </div>
-
-    <!-- ===== CỘT 2: ĐIỀU KIỆN TÌM KIẾM ===== -->
-    <div class="form-col">
-
-        <div class="form-group">
-            <label>Số bit cần kiểm tra sau marker (K):</label>
-            <input id="bitCount" type="number" value="5">
-        </div>
-        
-        
-        
-        
-         <div class="form-group">
-    <label>Số dòng kiểm tra có K bit giống nhau (M):</label>
-    <input id="sameBitCount" type="number" value="3" min="2">
-</div>
-
-
-
-
-
-<div class="form-group">
-    <label>
-       Số dòng kiểm tra có K bit ngược nhau
-      <input type="number" id="lineCountInput" value="6" min="2"
-       >
-    </label>
-
-    <button id="btnSame" class="active" onclick="toggleSame()">🔵 Tìm giống nhau</button>
-    <button id="btnOpposite" onclick="toggleOpposite()">🔴 Tìm ngược nhau</button>
-</div>
-
-
-
        <div id="inputSection">
     <div class="form-group">
         <label>Chuỗi bit cần tìm:</label>
@@ -533,12 +547,12 @@ button:active {
         <button onclick="downloadTXT()">Tải xuống file TXT</button>
     </div>
 </div>
-        
-        
-         <label>Chỉ khi nào bạn may mắn mới được bấm nút bên dưới @-@</label>
 
-       <button onclick="loadDefault()">Dùng file IPFS</button>
-      
+
+
+
+
+            
      
 
 
@@ -566,11 +580,13 @@ button:active {
     >
 
     <label style="margin-top:12px;">Lịch sử bit:</label>
-    <textarea
-        id="historyBox"
-        placeholder="Lịch sử bit sẽ hiện ở đây…"
-        readonly>
-    </textarea>
+    <input id="historyBox" readonly>
+    
+       <label>Chỉ khi nào bạn may mắn mới được bấm nút bên dưới @-@</label>
+
+       <button onclick="loadDefault()">Dùng file IPFS</button>
+
+
 
 </div>
 
@@ -579,6 +595,14 @@ button:active {
 <div class="info" id="summary"></div>
 <div class="info" id="positions"></div>
 <div id="preview" class="result-panel"></div>
+
+
+
+
+
+
+
+
 
 <script>
 let lastOutputText = "";
@@ -765,10 +789,17 @@ if (enableOpposite) {
     }
 }
 
+
+
+
+
+
+
+
 // danh sách dòng có bit NGƯỢC
 const oppositeLines = [];
 for (let i = 0; i < oppositeMatch.length; i++) {
-    if (oppositeMatch[i]) oppositeLines.push(i);
+    if (oppositeMatch[i]) oppositeLines.push(i + 1);
 }
 
 
@@ -875,22 +906,20 @@ sameBitMatch.forEach((v, i) => {
 
 
 
-if (enableSame && sameBitLines.length > 0) {
-    summary.innerHTML += `
-    <br>
-    <div class="samebit-box">
-        BIT GIỐNG NHAU: <b>${sameBitLines.length}</b><br>
-        <div class="samebit-list">
-            ${sameBitLines.map(i =>
-                `<span class="jump" onclick="jump(${i})">#${i}</span>`
-            ).join(" ")}
-        </div>
+// ====== BIT GIỐNG NHAU ======
+summary.innerHTML += `
+<br>
+<div class="samebit-box">
+    BIT GIỐNG NHAU: <b>${sameBitLines.length}</b><br>
+    <div class="samebit-list">
+        ${sameBitLines.map(i =>
+            `<span class="jump" onclick="jump(${i})">#${i}</span>`
+        ).join(" ")}
     </div>
-    `;
-}
+</div>
+`;
 
-
-
+// ====== BIT NGƯỢC NHAU ======
 if (oppositeLines.length > 0) {
     summary.innerHTML += `
     <br>
@@ -1063,9 +1092,9 @@ bit6Input.addEventListener("input", () => {
             return r.text();
         })
         .then(text => {
-    resetShift6();      // 👈 reset 6 ô
+    enableSame = false;
+    enableOpposite = false;
     processRawText(text);
-    bit6Input.focus(); // 👈 tự động focus vào ô nhập 6
 })
         .catch(err => alert("Lỗi IPFS: " + err.message));
 }
