@@ -373,6 +373,34 @@ button:active {
 }
 
 
+.samebit-box {
+    margin-top: 10px;
+}
+
+.samebit-list {
+    margin-top: 6px;
+    max-height: 120px;      /* 👈 giới hạn chiều cao */
+    overflow-y: auto;       /* 👈 cho cuộn */
+    padding: 6px 8px;
+
+    background: rgba(2,6,23,0.6);
+    border: 1px solid #334155;
+    border-radius: 10px;
+}
+
+/* scrollbar cho samebit */
+.samebit-list::-webkit-scrollbar {
+    width: 6px;
+}
+.samebit-list::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+}
+.samebit-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
 </style>
 </head>
 
@@ -724,12 +752,19 @@ sameBitMatch.forEach((v, i) => {
     if (v) sameBitLines.push(i + 1);
 });
 
+
+
+
 summary.innerHTML += `
 <br>
-BIT GIỐNG NHAU: <b>${sameBitLines.length}</b>
-${sameBitLines.map(i =>
-    `<span class="jump" onclick="jump(${i})">#${i}</span>`
-).join(" ")}
+<div class="samebit-box">
+    BIT GIỐNG NHAU: <b>${sameBitLines.length}</b><br>
+    <div class="samebit-list">
+        ${sameBitLines.map(i =>
+            `<span class="jump" onclick="jump(${i})">#${i}</span>`
+        ).join(" ")}
+    </div>
+</div>
 `;
 
 
