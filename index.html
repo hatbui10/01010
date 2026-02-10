@@ -400,6 +400,35 @@ button:active {
     background: transparent;
 }
 
+.opposite {
+    background: linear-gradient(90deg, #fb7185, #fda4af);
+    color: #500724;
+    font-weight: 700;
+}
+
+
+
+.oppositebit-box {
+  margin-top: 10px;
+  }
+
+.oppositebit-list {
+   margin-top: 6px;
+    max-height: 120px;      /* 👈 giới hạn chiều cao */
+    overflow-y: auto;       /* 👈 cho cuộn */
+    padding: 6px 8px;
+
+    background: rgba(2,6,23,0.6);
+    border: 1px solid #334155;
+    border-radius: 10px;
+}
+
+
+
+
+#inputSection {
+    display: none;
+}
 
 </style>
 </head>
@@ -463,28 +492,49 @@ button:active {
             <input id="bitCount" type="number" value="5">
         </div>
         
+        
+        
+        
          <div class="form-group">
-    <label>Số dòng có bit giống nhau (M):</label>
+    <label>Số dòng kiểm tra có K bit giống nhau (M):</label>
     <input id="sameBitCount" type="number" value="3" min="2">
 </div>
 
 
 
 
-        <div class="form-group">
-            <label>Chuỗi bit cần tìm:</label>
-            <input id="pattern" placeholder="vd: 01000">
-        </div>
 
-        <div class="form-group">
-            <label>Chọn file TXT:</label>
-            <input type="file" id="fileInput" accept=".txt">
-        </div>
+<div class="form-group">
+    <label>
+       Số dòng kiểm tra có K bit ngược nhau
+      <input type="number" id="lineCountInput" value="6" min="2"
+       >
+    </label>
 
-        <div class="form-actions">
-            <button onclick="processFile()">Xử lý</button>
-            <button onclick="downloadTXT()">Tải xuống file TXT</button>
-        </div>
+    <button id="btnSame" class="active" onclick="toggleSame()">🔵 Tìm giống nhau</button>
+    <button id="btnOpposite" onclick="toggleOpposite()">🔴 Tìm ngược nhau</button>
+</div>
+
+
+
+       <div id="inputSection">
+    <div class="form-group">
+        <label>Chuỗi bit cần tìm:</label>
+        <input id="pattern" placeholder="vd: 01000">
+    </div>
+
+    <div class="form-group">
+        <label>Chọn file TXT:</label>
+        <input type="file" id="fileInput" accept=".txt">
+    </div>
+
+    <div class="form-actions">
+        <button onclick="processFile()">Xử lý</button>
+        <button onclick="downloadTXT()">Tải xuống file TXT</button>
+    </div>
+</div>
+        
+        
          <label>Chỉ khi nào bạn may mắn mới được bấm nút bên dưới @-@</label>
 
        <button onclick="loadDefault()">Dùng file IPFS</button>
@@ -534,10 +584,33 @@ button:active {
 let lastOutputText = "";
 let BIT_SIZE = 17;
 let bits = [];
+let enableSame = true;
+let enableOpposite = false;
+let currentLines = [];
+
 
 let historyBuffer = [];
 
 
+function toggleSame() {
+    enableSame = true;
+    enableOpposite = false;
+
+    document.getElementById("btnSame").classList.add("active");
+    document.getElementById("btnOpposite").classList.remove("active");
+
+    analyze(currentLines);
+}
+
+function toggleOpposite() {
+    enableOpposite = true;
+    enableSame = false;
+
+    document.getElementById("btnOpposite").classList.add("active");
+    document.getElementById("btnSame").classList.remove("active");
+
+    analyze(currentLines);
+}
 
 
 function initRegister() {
@@ -577,6 +650,7 @@ function processRawText(raw) {
     raw = raw.replace(/\s+/g, "");
     const marker = markerValue();
     const K = +bitCount.value;
+   
 
     let lines = [];
     let i = 0;
@@ -598,7 +672,9 @@ function processRawText(raw) {
         }
     }
 
+     currentLines = lines;
     analyze(lines);
+    
 }
 
 
@@ -619,6 +695,9 @@ function analyze(lines) {
     const bitLen = [];
     const matchN = Array(lines.length).fill(false);
     const matchGroup = Array(lines.length).fill(false);
+    const sameBitMatch = Array(lines.length).fill(false);
+    const oppositeMatch = Array(lines.length).fill(false);
+
     const hits = [];
     const outputLines = [];
 
@@ -630,40 +709,67 @@ function analyze(lines) {
 
   
    // ===== CHECK BIT LIÊN TIẾP =====
-const M = +document.getElementById("sameBitCount").value;
-const sameBitMatch = Array(lines.length).fill(false);
-const sameBitStart = Array(lines.length).fill(false);
+if (enableSame) {
+    const M = +document.getElementById("sameBitCount").value;
+    let prevBit = null;
+    let count = 0;
 
-let prevBit = null;
-let count = 0;
+    for (let i = 0; i < lines.length; i++) {
+        const parts = lines[i].split(/\s+/);
+        const bit = parts[1] || "";
 
-for (let i = 0; i < lines.length; i++) {
-    const parts = lines[i].split(/\s+/);
-    const bit = parts[1] || "";
-
-    if (bit === prevBit) {
-        count++;
-    } else {
-        count = 1;
-        prevBit = bit;
-    }
-
-    // vừa đủ M → đây là DÒNG ĐẦU TIÊN CỦA CHUỖI
-    if (count === M) {
-        const start = i - M + 1;
-        sameBitStart[start] = true;
-
-        for (let j = start; j <= i; j++) {
-            sameBitMatch[j] = true;
+        if (bit === prevBit) {
+            count++;
+        } else {
+            count = 1;
+            prevBit = bit;
         }
-    }
 
-    // nếu dài hơn M → chỉ tô màu, KHÔNG thêm start
-    if (count > M) {
-        sameBitMatch[i] = true;
+        if (count >= M) {
+            for (let j = i - M + 1; j <= i; j++) {
+                sameBitMatch[j] = true;
+            }
+        }
     }
 }
 
+
+
+
+
+
+
+// ===== CHECK K-BIT NGƯỢC NHAU TRONG M DÒNG LIÊN TIẾP =====
+if (enableOpposite) {
+    const M2 = +document.getElementById("lineCountInput").value;
+
+    function isOppositeBits(a, b) {
+        if (!a || !b || a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) {
+            if (a[i] === b[i]) return false;
+        }
+        return true;
+    }
+
+    for (let i = 0; i <= lines.length - M2; i++) {
+        const baseBits = lines[i].split(/\s+/)[1] || "";
+
+        for (let j = i + 1; j < i + M2; j++) {
+            const curBits = lines[j].split(/\s+/)[1] || "";
+
+            if (isOppositeBits(baseBits, curBits)) {
+                oppositeMatch[i] = true;
+                oppositeMatch[j] = true;
+            }
+        }
+    }
+}
+
+// danh sách dòng có bit NGƯỢC
+const oppositeLines = [];
+for (let i = 0; i < oppositeMatch.length; i++) {
+    if (oppositeMatch[i]) oppositeLines.push(i);
+}
 
 
 
@@ -711,11 +817,17 @@ for (let i = 0; i < lines.length; i++) {
         div.id = "line-" + (i + 1);
         
         
-       div.className =
-    "line " +
-    (sameBitMatch[i] ? "matchGroup" :
-     matchGroup[i] ? "matchGroup" :
-     matchN[i] ? "matchN" : "normal");
+    div.className =
+    "line " + (
+        (enableOpposite && oppositeMatch[i]) ? "opposite" :
+        (enableSame && sameBitMatch[i]) ? "matchGroup" :
+        matchGroup[i] ? "matchGroup" :
+        matchN[i] ? "matchN" : "normal"
+    );
+     
+     
+     
+     
 
         const text = `#${i + 1}  ${l}`;
         div.textContent = text;
@@ -756,24 +868,46 @@ for (let i = 0; i < lines.length; i++) {
 
 
 const sameBitLines = [];
-sameBitStart.forEach((v, i) => {
+sameBitMatch.forEach((v, i) => {
     if (v) sameBitLines.push(i + 1);
 });
 
 
 
 
-summary.innerHTML += `
-<br>
-<div class="samebit-box">
-    BIT GIỐNG NHAU: <b>${sameBitLines.length}</b><br>
-    <div class="samebit-list">
-        ${sameBitLines.map(i =>
-            `<span class="jump" onclick="jump(${i})">#${i}</span>`
-        ).join(" ")}
+if (enableSame && sameBitLines.length > 0) {
+    summary.innerHTML += `
+    <br>
+    <div class="samebit-box">
+        BIT GIỐNG NHAU: <b>${sameBitLines.length}</b><br>
+        <div class="samebit-list">
+            ${sameBitLines.map(i =>
+                `<span class="jump" onclick="jump(${i})">#${i}</span>`
+            ).join(" ")}
+        </div>
     </div>
-</div>
-`;
+    `;
+}
+
+
+
+if (oppositeLines.length > 0) {
+    summary.innerHTML += `
+    <br>
+    <div class="oppositebit-box">
+        BIT NGƯỢC NHAU: <b>${oppositeLines.length}</b><br>
+        <div class="oppositebit-list">
+            ${oppositeLines.map(i =>
+                `<span class="jump opposite-jump" onclick="jump(${i})">#${i}</span>`
+            ).join(" ")}
+        </div>
+    </div>
+    `;
+}
+
+
+
+
 
 
 
