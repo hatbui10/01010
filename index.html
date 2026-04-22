@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Loc 1 sô </title>
+<title>Cyber Scan Clean</title>
 
 <style>
 :root {
@@ -28,7 +28,6 @@ body {
     overflow-y: auto;
 }
 
-/* HEADER */
 .sticky-header {
     position: sticky;
     top: 0;
@@ -38,7 +37,6 @@ body {
     border-bottom: 1px solid #222;
 }
 
-/* NAV */
 .nav {
     display: flex;
     gap: 6px;
@@ -61,7 +59,6 @@ body {
     transform: scale(0.95);
 }
 
-/* INPUT */
 .input-row {
     display: flex;
     gap: 10px;
@@ -78,7 +75,6 @@ body {
     border-radius: 8px;
     height: 50px;
     width: 50px;
-    outline: none;
 }
 
 #n1-box {
@@ -94,7 +90,6 @@ body {
     border-radius: 8px;
 }
 
-/* GRID */
 #list {
     flex: 1;
     overflow-y: auto;
@@ -150,52 +145,82 @@ const ls = document.getElementById('list');
 let digits = JSON.parse(localStorage.getItem('dg')) || [];
 let cur = localStorage.getItem('cn') || "";
 let hist = [];
-let lastMatches = [];
 
-/* RENDER (thêm data-v để tối ưu) */
+/* RENDER */
 function render() {
     if (digits.length === 0) {
         ls.innerHTML = "";
         return;
     }
     ls.innerHTML = digits.map(d =>
-        `<div class="c" data-v="${d}">${d}</div>`
+        `<div class="c">${d}</div>`
     ).join('');
 }
 
-/* UPDATE NHANH (chỉ xử lý phần cần) */
-function updateColor() {
-    requestAnimationFrame(() => {
-        // xoá highlight cũ
-        lastMatches.forEach(el => el.classList.remove('match'));
+/* LOGIC CHÍNH */
+function findPattern() {
+    if (!cur || digits.length < 2) return;
 
-        // tìm phần tử mới
-        lastMatches = [...ls.querySelectorAll(`[data-v="${cur}"]`)];
+    let pattern = [];
+    let positions = [];
 
-        // tô màu
-        lastMatches.forEach(el => el.classList.add('match'));
+    for (let i = 0; i < digits.length - 1; i++) {
+        if (digits[i] == cur) {
+            let C = parseInt(digits[i + 1]);
+
+            pattern.push(C >= 5 ? "A" : "b");
+            positions.push(i);
+        }
+    }
+
+    let target = "AbAbAb";
+    let matches = [];
+
+    for (let i = 0; i <= pattern.length - target.length; i++) {
+        let sub = pattern.slice(i, i + 6).join('');
+        if (sub === target) {
+            matches.push(i);
+        }
+    }
+
+    highlight(matches, positions);
+}
+
+/* HIGHLIGHT */
+function highlight(matches, positions) {
+    document.querySelectorAll('.c').forEach(el => el.classList.remove('match'));
+
+    matches.forEach(start => {
+        for (let i = 0; i < 6; i++) {
+            let idx = positions[start + i];
+
+            if (ls.children[idx]) ls.children[idx].classList.add('match');
+            if (ls.children[idx + 1]) ls.children[idx + 1].classList.add('match');
+        }
     });
 }
 
+/* LOAD FILE */
 document.getElementById('f').onchange = (e) => {
     const r = new FileReader();
     r.onload = () => {
         digits = r.result.replace(/\D/g, '').split('');
         localStorage.setItem('dg', JSON.stringify(digits));
         render();
+        findPattern();
     };
     r.readAsText(e.target.files[0]);
 };
 
+/* INPUT */
 ni.oninput = () => {
     if (ni.value !== "") {
         hist.push(cur);
         cur = ni.value;
         n1.innerText = cur;
         localStorage.setItem('cn', cur);
-        updateColor();
         ni.value = "";
-        ni.focus();
+        findPattern();
     }
 };
 
@@ -203,29 +228,24 @@ function undo() {
     if (hist.length > 0) {
         cur = hist.pop();
         n1.innerText = cur || "-";
-        updateColor();
+        findPattern();
     }
 }
 
 function clearAll() {
     if (confirm("Xoá sạch dữ liệu?")) {
         localStorage.clear();
-        digits = []; cur = "";
-        n1.innerText = "-"; ls.innerHTML = "";
-        ni.focus();
+        digits = [];
+        cur = "";
+        n1.innerText = "-";
+        ls.innerHTML = "";
     }
 }
-
-document.addEventListener('touchstart', (e) => {
-    if (!['INPUT', 'LABEL', 'DIV'].includes(e.target.tagName)) {
-        ni.focus();
-    }
-});
 
 window.onload = () => {
     n1.innerText = cur || "-";
     render();
-    ni.focus();
+    findPattern();
 };
 </script>
 
