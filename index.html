@@ -25,7 +25,6 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
 }
 
 .sticky-header {
@@ -55,10 +54,6 @@ body {
     font-weight: bold;
 }
 
-.btn:active {
-    transform: scale(0.95);
-}
-
 .input-row {
     display: flex;
     gap: 10px;
@@ -86,8 +81,6 @@ body {
     justify-content: center;
     font-size: 22px;
     color: var(--neon);
-    background: rgba(241, 196, 15, 0.1);
-    border-radius: 8px;
 }
 
 #list {
@@ -106,7 +99,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
     color: #666;
     border-radius: 6px;
 }
@@ -126,11 +118,13 @@ body {
     <div class="nav">
         <label class="btn">FILE<input type="file" id="f" hidden accept=".txt"></label>
         <div class="btn" onclick="undo()">UNDO</div>
+        <div class="btn" onclick="colorByN()">TÔ N</div>
+        <div class="btn" onclick="findPattern()">Ab</div>
         <div class="btn" onclick="clearAll()" style="color:#ff4757;border-color:#ff4757">CLEAR</div>
     </div>
 
     <div class="input-row">
-        <input type="number" id="n-input" inputmode="numeric" placeholder="NHẬP N">
+        <input type="number" id="n-input" placeholder="NHẬP N">
         <div id="n1-box">-</div>
     </div>
 </div>
@@ -145,69 +139,66 @@ const ls = document.getElementById('list');
 let digits = JSON.parse(localStorage.getItem('dg')) || [];
 let cur = localStorage.getItem('cn') || "";
 let hist = [];
+let cells = [];
 
-/* RENDER */
+/* RENDER (đã tối ưu) */
 function render() {
-    if (digits.length === 0) {
-        ls.innerHTML = "";
-        return;
-    }
-    ls.innerHTML = digits.map(d =>
-        `<div class="c">${d}</div>`
-    ).join('');
+    ls.innerHTML = digits.map(d => `<div class="c" data-v="${d}">${d}</div>`).join('');
+    cells = ls.children; // cache DOM
 }
 
-/* LOGIC CHÍNH */
+/* TÔ N (không query lại DOM) */
+function colorByN() {
+    for (let el of cells) el.classList.remove('match');
+    if (!cur) return;
+
+    for (let el of cells) {
+        if (el.dataset.v == cur) el.classList.add('match');
+    }
+}
+
+/* LOGIC Ab (đã tối ưu) */
 function findPattern() {
+    for (let el of cells) el.classList.remove('match');
+
     if (!cur || digits.length < 2) return;
 
     let pattern = [];
-    let positions = [];
+    let pos = [];
 
     for (let i = 0; i < digits.length - 1; i++) {
         if (digits[i] == cur) {
-            let C = parseInt(digits[i + 1]);
-
+            let C = digits[i+1];
             pattern.push(C >= 5 ? "A" : "b");
-            positions.push(i);
+            pos.push(i);
         }
     }
 
-    let target = "AbAbAb";
-    let matches = [];
-
-    for (let i = 0; i <= pattern.length - target.length; i++) {
-        let sub = pattern.slice(i, i + 6).join('');
-        if (sub === target) {
-            matches.push(i);
+    for (let i = 0; i <= pattern.length - 6; i++) {
+        if (
+            pattern[i] === "A" &&
+            pattern[i+1] === "b" &&
+            pattern[i+2] === "A" &&
+            pattern[i+3] === "b" &&
+            pattern[i+4] === "A" &&
+            pattern[i+5] === "b"
+        ) {
+            for (let j = 0; j < 6; j++) {
+                let idx = pos[i + j];
+                if (cells[idx]) cells[idx].classList.add('match');
+                if (cells[idx+1]) cells[idx+1].classList.add('match');
+            }
         }
     }
-
-    highlight(matches, positions);
-}
-
-/* HIGHLIGHT */
-function highlight(matches, positions) {
-    document.querySelectorAll('.c').forEach(el => el.classList.remove('match'));
-
-    matches.forEach(start => {
-        for (let i = 0; i < 6; i++) {
-            let idx = positions[start + i];
-
-            if (ls.children[idx]) ls.children[idx].classList.add('match');
-            if (ls.children[idx + 1]) ls.children[idx + 1].classList.add('match');
-        }
-    });
 }
 
 /* LOAD FILE */
-document.getElementById('f').onchange = (e) => {
+document.getElementById('f').onchange = e => {
     const r = new FileReader();
     r.onload = () => {
-        digits = r.result.replace(/\D/g, '').split('');
+        digits = r.result.replace(/\D/g,'').split('');
         localStorage.setItem('dg', JSON.stringify(digits));
         render();
-        findPattern();
     };
     r.readAsText(e.target.files[0]);
 };
@@ -220,15 +211,15 @@ ni.oninput = () => {
         n1.innerText = cur;
         localStorage.setItem('cn', cur);
         ni.value = "";
-        findPattern();
+        colorByN();
     }
 };
 
 function undo() {
-    if (hist.length > 0) {
+    if (hist.length) {
         cur = hist.pop();
         n1.innerText = cur || "-";
-        findPattern();
+        colorByN();
     }
 }
 
@@ -237,15 +228,14 @@ function clearAll() {
         localStorage.clear();
         digits = [];
         cur = "";
-        n1.innerText = "-";
         ls.innerHTML = "";
+        n1.innerText = "-";
     }
 }
 
 window.onload = () => {
     n1.innerText = cur || "-";
     render();
-    findPattern();
 };
 </script>
 
