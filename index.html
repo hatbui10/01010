@@ -2,1120 +2,232 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Tách & phân tích chuỗi bit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Loc 1 sô </title>
 
 <style>
-/* ===== NỀN + BODY ===== */
+:root {
+    --neon: #f1c40f;
+    --blue: #00d2ff;
+    --bg: #050505;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    padding: 40px;
+    background: var(--bg);
+    color: #fff;
+    font-family: monospace;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+/* HEADER */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+    padding: 10px;
+    border-bottom: 1px solid #222;
+}
+
+/* NAV */
+.nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.btn {
+    flex: 1;
+    background: #111;
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    padding: 10px 0;
     text-align: center;
-    background:
-        radial-gradient(1200px 600px at 10% -10%, #1e293b 0%, transparent 60%),
-        radial-gradient(800px 500px at 90% 10%, #0f172a 0%, transparent 55%),
-        #020617;
-    color: #e5e7eb;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
 }
 
-/* ===== TIÊU ĐỀ ===== */
-h2 {
-    font-size: 30px;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    margin: 0 auto 26px;
+.btn:active {
+    transform: scale(0.95);
+}
+
+/* INPUT */
+.input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#n-input {
+    flex: 1;
+    background: #000;
+    border: 2px solid var(--neon);
+    color: var(--neon);
+    font-size: 26px;
     text-align: center;
-    color: #c7d2fe;
-    margin-bottom: 26px;
-
-    position: relative;
-    display: inline-block;
-    padding-bottom: 10px;
-
-    text-shadow:
-        0 0 12px rgba(147,197,253,0.25),
-        0 0 2px rgba(255,255,255,0.08);
-}
-
-/* gạch sáng bên dưới */
-h2::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-
-    width: 100%;
-    height: 3px;
-    border-radius: 3px;
-
-    background: linear-gradient(
-        90deg,
-        #6366f1,
-        #38bdf8,
-        #22d3ee
-    );
-
-    box-shadow:
-        0 0 10px rgba(56,189,248,0.7),
-        0 0 20px rgba(99,102,241,0.4);
-}
-
-/* ===== INPUT CHUNG ===== */
-input {
-    padding: 10px 12px;
-    font-size: 15px;
-    width: 100%;
-    border-radius: 10px;
-    border: 1px solid #334155;
-    background: linear-gradient(180deg, #020617, #020617);
-    color: #e5e7eb;
-    transition: all 0.2s ease;
-}
-
-input:focus {
-    border-color: #6366f1;
-    box-shadow: 0 0 0 2px rgba(99,102,241,0.35);
+    border-radius: 8px;
+    height: 50px;
+    width: 50px;
     outline: none;
 }
 
-/* ===== BUTTON ===== */
-button {
-    padding: 12px 26px;
-    font-size: 15px;
-    border-radius: 999px;
-    border: none;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    color: #fff;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
-   margin: 15px auto;
-    display: block;
-        align-items: center;
-    justify-content: center;
-}
-
-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(79,70,229,0.4);
-}
-
-button:active {
-    transform: translateY(0);
-    box-shadow: none;
-}
-
-/* ===== GRID 3 CỘT ===== */
-.form-grid-3 {
-    display: grid;
-    grid-template-columns: minmax(280px, 1fr)
-                           minmax(280px, 1fr)
-                           minmax(360px, 1.2fr);
-    gap: 32px;
-    max-width: 1280px;
-    margin: 0 auto;
-    align-items: start; /* QUAN TRỌNG */
-}
-
-.form-col {
-    background: linear-gradient(180deg, #020617, #020617);
-    border: 1px solid #1e293b;
-    border-radius: 16px;
-    padding: 20px 22px;
-
+#n1-box {
+    width: 50px;
+    height: 50px;
+    border: 2px dashed var(--neon);
     display: flex;
-    flex-direction: column;
-    gap: 14px;
-
-    min-width: 0;        /* CHỐNG TRÀN */
-    overflow: hidden;    /* CHỐNG ĐÈ */
-}
-
-
-.form-col > .form-group input,
-.form-col textarea,
-.form-col button {
-    width: 60%;
-     text-align: center;
-
-}
-
-/* ===== LABEL ===== */
-.form-group label {
-    display: block;
-    margin-bottom: 4px;
-    font-weight: 600;
-    color: #c7d2fe;
-}
-
-/* ===== SHIFT REGISTER ===== */
-#shift-register {
-    display: none; /* tạm thời ẩn */
-    grid-template-columns: repeat(auto-fill, 36px);
-    gap: 6px;
-}
-
-
-
-#shift-register::-webkit-scrollbar {
-    height: 6px;
-}
-#shift-register::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 4px;
-}
-@media (max-width: 1100px) {
-    .form-grid-3 {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ===== BIT ===== */
-.bit {
-    width: 24px;
-    height: 24px;
-    text-align: center;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 15px;
-    border-radius: 6px;
-    background: #020617;
-    border: 1px solid #334155;
-    color: #94a3b8;
-    padding: 5px;
-}
-
-/* ===== Ô 18 (NHẬP) ===== */
-#bit-input {
-    background: linear-gradient(135deg, #0f172a, #020617);
-    color: #38bdf8;
-    border: 2px solid #38bdf8;
-    font-size: 18px;
-    font-weight: 700;
-    box-shadow:
-        0 0 0 2px rgba(56,189,248,0.25),
-        inset 0 0 8px rgba(56,189,248,0.15);
-}
-
-#bit-input:focus {
-    box-shadow:
-        0 0 0 2px rgba(56,189,248,0.6),
-        0 0 18px rgba(56,189,248,0.9);
-    transform: scale(1.08);
-}
-
-/* ===== HISTORY BOX ===== */
-#historyBox {
-    width: 80%;
-    height: 22px;
-    padding: 10px 15px;
-    background: #020617;
-    color: #e5e7eb;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    font-family: "JetBrains Mono", Consolas, monospace;
-    font-size: 20px;
-    line-height: 22px;   /* 👈 bí kíp */
-    text-align: center; /* nếu muốn */
-     margin: 0 auto;
-}
-   
-   margin: 0 auto;
-
-/* ===== SCROLLBAR ===== */
-#historyBox::-webkit-scrollbar {
-    width: 8px;
-}
-#historyBox::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 4px;
-}
-#historyBox::-webkit-scrollbar-track {
-    background: #020617;
-}
-
-/* ===== PREVIEW ===== */
-#preview {
-    margin-top: 24px;
-    max-height: 420px;
-    overflow: auto;
-}
-
-/* ===== DÒNG ===== */
-.line {
-    font-family: "JetBrains Mono", Consolas, monospace;
-    padding: 6px 10px;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--neon);
+    background: rgba(241, 196, 15, 0.1);
     border-radius: 8px;
-    margin-bottom: 4px;
-    white-space: pre;
 }
 
-.normal { background: #020617; }
-
-.matchN {
-    background: linear-gradient(90deg, #facc15, #fde047);
-    color: #422006;
-    font-weight: 700;
-}
-
-.matchGroup {
-    background: linear-gradient(90deg, #22c55e, #4ade80);
-    color: #022c22;
-    font-weight: 700;
-}
-
-/* ===== INFO ===== */
-.info {
-    margin-top: 18px;
-    padding: 12px 16px;
-
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.3px;
-
-    color: #c7d2fe;
-    background:
-        linear-gradient(180deg, rgba(30,41,59,0.65), rgba(2,6,23,0.9));
-
-    border: 1px solid rgba(99,102,241,0.35);
-    border-radius: 14px;
-
-    box-shadow:
-        0 8px 24px rgba(0,0,0,0.45),
-        inset 0 1px 0 rgba(255,255,255,0.06);
-
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-
-    transition:
-        border-color 0.25s ease,
-        box-shadow 0.25s ease,
-        transform 0.2s ease;
-}
-
-.jump {
-    color: #60a5fa;
-    cursor: pointer;
-    margin-right: 8px;
-    text-decoration: underline;
-}
-
-/* Khung bảng kết quả */
-.result-panel {
-    margin-top: 20px;
-    padding: 14px;
-    text-align: left;
-    background: linear-gradient(180deg, #020617, #020617);
-    border: 1px solid #1e293b;
-    border-radius: 16px;
-
-    max-height: 420px;
+/* GRID */
+#list {
+    flex: 1;
     overflow-y: auto;
-
-    box-shadow:
-        0 12px 32px rgba(0,0,0,0.4),
-        inset 0 1px 0 rgba(255,255,255,0.04);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    grid-auto-rows: 40px;
+    gap: 4px;
+    padding: 10px;
 }
 
-/* từng dòng trong bảng */
-.result-panel .line {
-    font-family: "JetBrains Mono", Consolas, monospace;
-    font-size: 14px;
-    text-align: left;
-    padding: 8px 10px;
-    margin-bottom: 6px;
-
-    border-radius: 10px;
-    white-space: pre;
-
-    transition: all 0.15s ease;
-}
-
-/* hover cho dễ đọc */
-.result-panel .line:hover {
-    transform: translateX(4px);
-    filter: brightness(1.1);
-}
-
-/* scrollbar cho đỡ đau mắt */
-.result-panel::-webkit-scrollbar {
-    width: 8px;
-}
-
-.result-panel::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 4px;
-}
-
-.result-panel::-webkit-scrollbar-track {
-    background: #020617;
-}
-
-
-#shift6 {
+.c {
+    background: #111;
+    border: 1px solid #222;
     display: flex;
-    gap: 6px;
+    align-items: center;
     justify-content: center;
+    font-size: 15px;
+    color: #666;
+    border-radius: 6px;
 }
 
-.bit {
-    width: 30px;
-    height: 30px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: 600;
+.match {
+    background: var(--neon) !important;
+    color: #000 !important;
+    font-weight: bold;
+    box-shadow: 0 0 10px var(--neon);
 }
-
-.bit-input {
-    border: 2px solid #4f46e5;
-}
-
-.bit-input6 {
-    border: 2px solid #4f46e5;
-    text-align: center;
-    margin: 0 auto;
-}
-
-
-.samebit-box {
-    margin-top: 10px;
-}
-
-.samebit-list {
-    margin-top: 6px;
-    max-height: 120px;      /* 👈 giới hạn chiều cao */
-    overflow-y: auto;       /* 👈 cho cuộn */
-    padding: 6px 8px;
-
-    background: rgba(2,6,23,0.6);
-    border: 1px solid #334155;
-    border-radius: 10px;
-}
-
-/* scrollbar cho samebit */
-.samebit-list::-webkit-scrollbar {
-    width: 6px;
-}
-.samebit-list::-webkit-scrollbar-thumb {
-    background: #475569;
-    border-radius: 4px;
-}
-.samebit-list::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.opposite {
-    background: linear-gradient(90deg, #fb7185, #fda4af);
-    color: #500724;
-    font-weight: 700;
-}
-
-
-
-.oppositebit-box {
-   margin-top: 10px;
-}
-
-.oppositebit-list {
-   margin-top: 6px;
-    max-height: 120px;      /* 👈 giới hạn chiều cao */
-    overflow-y: auto;       /* 👈 cho cuộn */
-    padding: 6px 8px;
-
-    background: rgba(2,6,23,0.6);
-    border: 1px solid #334155;
-    border-radius: 10px;
-}
-
-
-
-
-#inputSection {
-    display: none;
-}
-
 </style>
 </head>
 
 <body>
 
-<h2>https://github.com/hatbui10/lucky/delete/main/pl.html
-</h2>
-
-<div class="form-grid-3">
-
-
-
-<div id="inputSection">
-
-    <!-- ===== CỘT 1: THÔNG SỐ CHÍNH ===== -->
-    <div class="form-col">
-
-        <div class="form-group">
-            <label>Marker:</label>
-            <input id="marker" value="1000">
-        </div>
-
-        <div class="form-group">
-            <label>Số dòng liên tiếp (N):</label>
-            <input id="groupSize" type="number" value="1">
-        </div>
-
-        <div class="form-group">
-            <label>Tổng số bit (cho N dòng):</label>
-            <input id="targetBits" type="number" value="15">
-        </div>
-        
-
-    </div>
-     </div>
-
-
-
-
-
-    <!-- ===== CỘT 2: ĐIỀU KIỆN TÌM KIẾM ===== -->
-    <div class="form-col">
-
-        <div class="form-group">
-            <label>Số bit cần kiểm tra sau marker (K):</label>
-            <input id="bitCount" type="number" value="5">
-        </div>
-        
-        
-        
-        
-         <div class="form-group">
-    <label>Số dòng kiểm tra có K bit giống nhau (M):</label>
-    <input id="sameBitCount"
-       type="number"
-       value="3"
-       min="2"
-       onchange="analyze()">
-
-</div>
-
-
-
-
-
-<div class="control-box">
-    <label>
-        Số dòng kiểm tra:
-      <input type="number" id="lineCountInput" value="6" min="2"
-       style="width:60px;" onchange="analyze()">
-    </label>
-
-    <button id="btnSame" class="active" onclick="toggleSame()">🔵 Tìm giống nhau</button>
-    <button id="btnOpposite" onclick="toggleOpposite()">🔴 Tìm ngược nhau</button>
-</div>
-
- <div id="shift6">
-    <input class="bit" readonly value="-">
-    <input class="bit" readonly value="-">
-    <input class="bit" readonly value="-">
-    <input class="bit" readonly value="-">
-    <input class="bit" readonly value="-">
-
-    <!-- ô số 6: cho nhập -->
-    <input
-        class="bit bit-input"
-        id="bit6"
-        maxlength="1"
-        inputmode="numeric"
-        pattern="[01]"
-        autocomplete="off"
-        value="-"
-    >
-</div>
-
-         
-         
-         <button onclick="resetRegister()">Reset</button>
-
-
-       <div id="inputSection">
-    <div class="form-group">
-        <label>Chuỗi bit cần tìm:</label>
-        <input id="pattern" placeholder="vd: 01000">
+<div class="sticky-header">
+    <div class="nav">
+        <label class="btn">FILE<input type="file" id="f" hidden accept=".txt"></label>
+        <div class="btn" onclick="undo()">UNDO</div>
+        <div class="btn" onclick="clearAll()" style="color:#ff4757;border-color:#ff4757">CLEAR</div>
     </div>
 
-    <div class="form-group">
-        <label>Chọn file TXT:</label>
-        <input type="file" id="fileInput" accept=".txt">
-    </div>
-
-    <div class="form-actions">
-        <button onclick="processFile()">Xử lý</button>
-        <button onclick="downloadTXT()">Tải xuống file TXT</button>
+    <div class="input-row">
+        <input type="number" id="n-input" inputmode="numeric" placeholder="NHẬP N">
+        <div id="n1-box">-</div>
     </div>
 </div>
 
-
-
-
-
-            
-     
-
-
-    </div>
-
-    <!-- ===== CỘT 3: SHIFT REGISTER + LỊCH SỬ ===== -->
-    <div class="form-col">
-
-    <div class="form-group">
-        <label>Số bit lịch sử:</label>
-        <input id="bitSize" type="number" value="17" min="1">
-        <button type="button" onclick="initRegister()">Apply</button>
-    </div>
-
-    <label>Shift Register:</label>
-    <div id="shift-register"></div>
-
-    <input
-        id="bit-input"
-        class="bit bit-input6"
-        maxlength="1"
-        inputmode="numeric"
-        pattern="[01]"
-        autocomplete="off"
-    >
-
-    <label style="margin-top:12px;">Lịch sử bit:</label>
-    <input id="historyBox" readonly>
-    
-       <label>Chỉ khi nào bạn may mắn mới được bấm nút bên dưới @-@</label>
-
-       <button onclick="loadDefault()">Dùng file IPFS</button>
-
-
-
-</div>
-
-</div>
-
-<div class="info" id="summary"></div>
-<div class="info" id="positions"></div>
-<div id="preview" class="result-panel"></div>
-
-
-
-
-
-
-
-
+<div id="list"></div>
 
 <script>
-let lastOutputText = "";
-let BIT_SIZE = 17;
-let bits = [];
-let enableSame = true;
-let enableOpposite = false;
-let currentLines = [];
-
-
-let historyBuffer = [];
-
-
-function toggleSame() {
-    enableSame = true;
-    enableOpposite = false;
-
-    document.getElementById("btnSame").classList.add("active");
-    document.getElementById("btnOpposite").classList.remove("active");
-
-    analyze(currentLines);
-}
-
-function toggleOpposite() {
-    enableOpposite = true;
-    enableSame = false;
-
-    document.getElementById("btnOpposite").classList.add("active");
-    document.getElementById("btnSame").classList.remove("active");
-
-    analyze(currentLines);
-}
-
-
-function initRegister() {
-    BIT_SIZE = +document.getElementById("bitSize").value || 17;
-
-    const container = document.getElementById("shift-register");
-    container.innerHTML = "";
-    bits = [];
-
-    for (let i = 0; i < BIT_SIZE + 1; i++) {
-        const input = document.createElement("input");
-        input.className = "bit";
-        input.maxLength = 1;
-        input.value = "-"; // 👈 chưa có dữ liệu
-        container.appendChild(input);
-        bits.push(input);
-    }
-
-    // buffer lịch sử ban đầu toàn '-'
-    historyBuffer = Array(BIT_SIZE).fill("-");
-
-    historyBox.value = groupBits(historyBuffer.join(""), 5);
-}
-
-
-function processFile() {
-    const file = document.getElementById("fileInput").files[0];
-    if (!file) return alert("Chưa chọn file");
-
-    const reader = new FileReader();
-    reader.onload = e => processRawText(e.target.result);
-    reader.readAsText(file);
-}
-
-
-function processRawText(raw) {
-    raw = raw.replace(/\s+/g, "");
-    const marker = markerValue();
-    const K = +bitCount.value;
-   
-
-    let lines = [];
-    let i = 0;
-
-    while (i <= raw.length - marker.length) {
-        if (raw.substr(i, marker.length) === marker) {
-            const start = i + marker.length;
-            const firstBits = raw.substr(start, K);
-
-            let nextMarker = raw.indexOf(marker, start + K);
-            if (nextMarker === -1) nextMarker = raw.length;
-
-            const rest = raw.substring(start + K, nextMarker);
-
-            lines.push(marker + "    " + firstBits + "    " + rest);
-            i = nextMarker;
-        } else {
-            i++;
-        }
-    }
-
-     currentLines = lines;
-    analyze(lines);
-    
-}
-
-
-
-
-
-
-function analyze(lines) {
-    const N = +groupSize.value;
-    const target = +targetBits.value;
-    const K = +bitCount.value;
-    const pattern = document.getElementById("pattern").value.trim();
-
-    const preview = document.getElementById("preview");
-    const summary = document.getElementById("summary");
-    const positions = document.getElementById("positions");
-
-    const bitLen = [];
-    const matchN = Array(lines.length).fill(false);
-    const matchGroup = Array(lines.length).fill(false);
-    const sameBitMatch = Array(lines.length).fill(false);
-    const oppositeMatch = Array(lines.length).fill(false);
-
-    const hits = [];
-    const outputLines = [];
-
-
-
-
-
-
-
-  
-   // ===== CHECK BIT LIÊN TIẾP =====
-if (enableSame) {
-    const M = +document.getElementById("sameBitCount").value;
-    let prevBit = null;
-    let count = 0;
-
-    for (let i = 0; i < lines.length; i++) {
-        const parts = lines[i].split(/\s+/);
-        const bit = parts[1] || "";
-
-        if (bit === prevBit) {
-            count++;
-        } else {
-            count = 1;
-            prevBit = bit;
-        }
-
-        if (count >= M) {
-            for (let j = i - M + 1; j <= i; j++) {
-                sameBitMatch[j] = true;
-            }
-        }
-    }
-}
-
-
-
-
-
-
-
-// ===== CHECK K-BIT NGƯỢC NHAU TRONG M DÒNG LIÊN TIẾP =====
-if (enableOpposite) {
-    const M2 = +document.getElementById("lineCountInput").value;
-
-    function isOppositeBits(a, b) {
-        if (!a || !b || a.length !== b.length) return false;
-        for (let i = 0; i < a.length; i++) {
-            if (a[i] === b[i]) return false;
-        }
-        return true;
-    }
-
-    for (let i = 0; i <= lines.length - M2; i++) {
-        const baseBits = lines[i].split(/\s+/)[1] || "";
-
-        for (let j = i + 1; j < i + M2; j++) {
-            const curBits = lines[j].split(/\s+/)[1] || "";
-
-            if (isOppositeBits(baseBits, curBits)) {
-                oppositeMatch[i] = true;
-                oppositeMatch[j] = true;
-            }
-        }
-    }
-}
-
-
-
-
-
-
-
-
-// danh sách dòng có bit NGƯỢC
-const oppositeLines = [];
-for (let i = 0; i < oppositeMatch.length; i++) {
-    if (oppositeMatch[i]) oppositeLines.push(i + 1);
-}
-
-
-
-
-    
-    
-
-    // 1️⃣ tách & tính độ dài bit + kiểm tra K-bit
-    lines.forEach((l, i) => {
-        const parts = l.split(/\s+/);
-        const marker = parts[0] || "";
-        const firstBits = parts[1] || "";
-        const rest = parts[2] || "";
-
-        bitLen[i] = marker.length + firstBits.length + rest.length;
-
-        if (pattern && firstBits === pattern && firstBits.length === K) {
-            matchN[i] = true;
-        }
-    });
-
-    // 2️⃣ kiểm tra nhóm N dòng (phải có K-bit khớp)
-    for (let i = 0; i <= lines.length - N; i++) {
-        let sum = 0;
-        let hasKMatch = false;
-
-        for (let j = 0; j < N; j++) {
-            sum += bitLen[i + j];
-            if (matchN[i + j]) hasKMatch = true;
-        }
-
-        if (sum === target && hasKMatch) {
-            for (let j = 0; j < N; j++) {
-                matchGroup[i + j] = true;
-            }
-            hits.push(i + 1);
-        }
-    }
-
-    // 3️⃣ render preview + xuất file
-    preview.innerHTML = "";
-
-    lines.forEach((l, i) => {
-        const div = document.createElement("div");
-        div.id = "line-" + (i + 1);
-        
-        
-    div.className =
-    "line " + (
-        (enableOpposite && oppositeMatch[i]) ? "opposite" :
-        (enableSame && sameBitMatch[i]) ? "matchGroup" :
-        matchGroup[i] ? "matchGroup" :
-        matchN[i] ? "matchN" : "normal"
-    );
-     
-     
-     
-     
-
-        const text = `#${i + 1}  ${l}`;
-        div.textContent = text;
-        preview.appendChild(div);
-
-        const tag =
-            matchGroup[i] ? "[GROUP]" :
-            matchN[i] ? "[K-BIT]" : "[OK]";
-
-        outputLines.push(`${tag} ${text}`);
-    });
-
-    // 4️⃣ summary: hiện các dòng tô màu
-    const groupLines = [];
-    const kbitLines = [];
-
-    lines.forEach((_, i) => {
-        if (matchGroup[i]) groupLines.push(i + 1);
-        else if (matchN[i]) kbitLines.push(i + 1);
-    });
-
-   summary.innerHTML = `
-    Tổng dòng: <b>${lines.length}</b><br>
-
-    GROUP: <b>${groupLines.length}</b>
-    ${groupLines.map(i =>
-        `<span class="jump" onclick="jump(${i})">#${i}</span>`
-    ).join(" ")}
-
-    <br>
-
-    K-BIT: <b>${kbitLines.length}</b>
-    ${kbitLines.map(i =>
-        `<span class="jump" onclick="jump(${i})">#${i}</span>`
-    ).join(" ")}
-    
-`;
-
-
-const sameBitLines = [];
-sameBitMatch.forEach((v, i) => {
-    if (v) sameBitLines.push(i + 1);
-});
-
-
-
-
-// ====== BIT GIỐNG NHAU ======
-summary.innerHTML += `
-<br>
-<div class="samebit-box">
-    BIT GIỐNG NHAU: <b>${sameBitLines.length}</b><br>
-    <div class="samebit-list">
-        ${sameBitLines.map(i =>
-            `<span class="jump" onclick="jump(${i})">#${i}</span>`
-        ).join(" ")}
-    </div>
-</div>
-`;
-
-// ====== BIT NGƯỢC NHAU ======
-if (oppositeLines.length > 0) {
-    summary.innerHTML += `
-    <br>
-    <div class="oppositebit-box">
-        BIT NGƯỢC NHAU: <b>${oppositeLines.length}</b><br>
-        <div class="oppositebit-list">
-            ${oppositeLines.map(i =>
-                `<span class="jump opposite-jump" onclick="jump(${i})">#${i}</span>`
-            ).join(" ")}
-        </div>
-    </div>
-    `;
-}
-
-
-
-
-
-
-
-    positions.innerHTML =
-        hits.map(i =>
-            `<span class="jump" onclick="jump(${i})">#${i}</span>`
-        ).join("");
-
-    lastOutputText = outputLines.join("\n");
-    
-      
-    
-}
-
-
-
-
-
-
-
-
-
-
-function downloadTXT() {
-    if (!lastOutputText) {
-        alert("Chưa có kết quả. Hãy bấm Xử lý trước.");
+const ni = document.getElementById('n-input');
+const n1 = document.getElementById('n1-box');
+const ls = document.getElementById('list');
+
+let digits = JSON.parse(localStorage.getItem('dg')) || [];
+let cur = localStorage.getItem('cn') || "";
+let hist = [];
+let lastMatches = [];
+
+/* RENDER (thêm data-v để tối ưu) */
+function render() {
+    if (digits.length === 0) {
+        ls.innerHTML = "";
         return;
     }
-
-    const blob = new Blob([lastOutputText], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "ket_qua_phan_tich.txt";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    URL.revokeObjectURL(url);
+    ls.innerHTML = digits.map(d =>
+        `<div class="c" data-v="${d}">${d}</div>`
+    ).join('');
 }
 
-function jump(n) {
-    document.getElementById("line-" + n)
-        .scrollIntoView({ behavior: "smooth", block: "center" });
+/* UPDATE NHANH (chỉ xử lý phần cần) */
+function updateColor() {
+    requestAnimationFrame(() => {
+        // xoá highlight cũ
+        lastMatches.forEach(el => el.classList.remove('match'));
+
+        // tìm phần tử mới
+        lastMatches = [...ls.querySelectorAll(`[data-v="${cur}"]`)];
+
+        // tô màu
+        lastMatches.forEach(el => el.classList.add('match'));
+    });
 }
 
-function markerValue() {
-    const raw = document.getElementById("marker").value;
-    return raw.replace(/[^01]/g, "");
-}
+document.getElementById('f').onchange = (e) => {
+    const r = new FileReader();
+    r.onload = () => {
+        digits = r.result.replace(/\D/g, '').split('');
+        localStorage.setItem('dg', JSON.stringify(digits));
+        render();
+    };
+    r.readAsText(e.target.files[0]);
+};
 
-
-
-
-const input = document.getElementById("bit-input");
-
-
-
-input.addEventListener("input", () => {
-    const val = input.value.replace(/[^01]/g, "");
-    if (!val) return;
-
-    // shift buffer lịch sử
-    historyBuffer.shift();
-    historyBuffer.push(val);
-
-    // cập nhật register hiển thị
-    for (let i = 0; i < BIT_SIZE; i++) {
-        bits[i].value = historyBuffer[i];
+ni.oninput = () => {
+    if (ni.value !== "") {
+        hist.push(cur);
+        cur = ni.value;
+        n1.innerText = cur;
+        localStorage.setItem('cn', cur);
+        updateColor();
+        ni.value = "";
+        ni.focus();
     }
-    bits[BIT_SIZE].value = val;
+};
 
-    // hiển thị lịch sử (1 dòng duy nhất)
-    historyBox.value = groupBits(historyBuffer.join(""), 5);
+function undo() {
+    if (hist.length > 0) {
+        cur = hist.pop();
+        n1.innerText = cur || "-";
+        updateColor();
+    }
+}
 
-    // marker cũng chia nhóm
-    updateMarker(historyBuffer.join(""));
+function clearAll() {
+    if (confirm("Xoá sạch dữ liệu?")) {
+        localStorage.clear();
+        digits = []; cur = "";
+        n1.innerText = "-"; ls.innerHTML = "";
+        ni.focus();
+    }
+}
 
-    input.value = "";
+document.addEventListener('touchstart', (e) => {
+    if (!['INPUT', 'LABEL', 'DIV'].includes(e.target.tagName)) {
+        ni.focus();
+    }
 });
 
-
-
-
-
-
-
-function updateMarker(bitsRaw) {
-    marker.value = groupBits(bitsRaw, 5);
-}
-
-function groupBits(str, size = 5) {
-    return str.match(new RegExp(`.{1,${size}}`, "g")).join("   ");
-}
-
-function resetRegister() {
-    // reset buffer về toàn '-'
-    historyBuffer = Array(BIT_SIZE).fill("-");
-
-    // reset hiển thị register
-    for (let i = 0; i <= BIT_SIZE; i++) {
-        bits[i].value = "-";
-    }
-
-    // reset lịch sử (1 dòng)
-    historyBox.value = groupBits(historyBuffer.join(""), 5);
-
-    // reset marker hiển thị (không đụng input file)
-    updateMarker(historyBuffer.join(""));
-
-    // clear ô nhập bit
-    input.value = "";
-    input.focus();
-}
-
-
-const shift6Bits = document.querySelectorAll("#shift6 .bit");
-const bit6Input = document.getElementById("bit6");
-
-// init hiển thị
-shift6Bits.forEach(b => b.value = "-");
-
-bit6Input.value = ""; // ô nhập trống
-
-bit6Input.addEventListener("input", () => {
-    const val = bit6Input.value.replace(/[^01]/g, "");
-    if (!val) return;
-
-    // dịch trái
-    for (let i = 0; i < shift6Bits.length - 1; i++) {
-        shift6Bits[i].value = shift6Bits[i + 1].value;
-    }
-
-    // bit mới vào ô cuối
-    shift6Bits[shift6Bits.length - 1].value = val;
-
-    // clear để nhập tiếp
-    bit6Input.value = "";
-});
-
-  
-  
-  
-  const DEFAULT_FILE_URL =
-"https://tomato-delicate-zebra-533.mypinata.cloud/ipfs/bafybeidlqhc3nf5ygzssmbmpzalssf3qk3errgudbcgvzvamq5yg3lsjh4";
-
-
-  function loadDefault() {
-    fetch(DEFAULT_FILE_URL)
-        .then(r => {
-            if (!r.ok) throw new Error("Không tải được IPFS");
-            return r.text();
-        })
-        .then(text => {
-    enableSame = false;
-    enableOpposite = false;
-    processRawText(text);
-})
-        .catch(err => alert("Lỗi IPFS: " + err.message));
-}
-
-function resetShift6() {
-    shift6Bits.forEach(b => b.value = "-");
-    bit6Input.value = "";
-}
-
-
-
-window.addEventListener("load", () => {
-    initRegister();
-    document.getElementById("bit-input").focus();
-});
-
+window.onload = () => {
+    n1.innerText = cur || "-";
+    render();
+    ni.focus();
+};
 </script>
 
 </body>
 </html>
-
-
-
